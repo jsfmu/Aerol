@@ -8,7 +8,7 @@ No bone-health features. No invented wearable readings or built-in TERRA predict
 Requires Python 3.10+; the app has no third-party Python or JavaScript dependencies.
 
 ```sh
-cd aerol-team-kit
+cd Aerol
 python3 -m aerol
 ```
 
