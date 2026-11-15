@@ -1,79 +1,40 @@
-# Data provenance
+# Data sources, verification and limits
 
-## Radiation
+Checked 2026-11-15 unless stated. Statuses also appear in the dashboard (Model & sources).
 
-NASA RadLab, ISS Columbus, DosTel1 and DosTel2, March 27, 2015 through March 2,
-2016. 585,235 original readings. Accessed November 14, 2026.
+| Source | Status | Used for | Limits |
+|---|---|---|---|
+| [NASA RadLab](https://visualization.osdr.nasa.gov/radlab/gui/overview/) ISS DosTel1/2, 2015-03-27 → 2016-03-02 | bundled (585,235 rows; SHA-256 in `aerol/data/snapshot.json`) | Observed station dose rate, cumulative station dose | Absorbed dose rate (µGy/h) at a Columbus-module location. Area monitor ≠ personal dosimeter; not converted to Sv. Days with zero coverage stay null. |
+| [RadLab API docs](https://visualization.osdr.nasa.gov/radlab/gui/data-api/) | **HTTP 500 at check** | — | Units carried from the 2026-11-14 export query. |
+| [Al-Turki et al. 2024](https://www.nature.com/articles/s42003-024-06014-x) Suppl. Data 2 | bundled | Observed TERRA (TW, UUAGGG, 11 samples) | One astronaut; no pre-flight personal baseline → no fold change computed. In vitro radiation raised TERRA; simulated microgravity did not. |
+| [NASA Twins Study](https://pmc.ncbi.nlm.nih.gov/articles/PMC7580864/) | text verified | Mission dosimetry records | 76.18 mGy physical dosimeter dose, 146.34 mSv effective dose. Not spread over days or used to calibrate anything. |
+| NTRS 20160012724 (slide 24) | bundled mapping | FD → calendar dates for TERRA samples | Dates only; clock times unverified; post-flight dates derived from landing + R days. |
+| [OSD-569](https://osdr.nasa.gov/bio/repo/data/studies/OSD-569) LSDS-7 CBC | **downloaded & bundled** (`aerol/data/osd569_LSDS-7_cbc_submitted.csv`, SHA-256 in research.json) | Observed WBC + differential, 4 crew | Inspiration4 (3-day flight). L-92, L-44, L-3, R+1, R+45, R+82, R+194 (C003 R+1 present). Thousand/µL = 10⁹/L; differentials cells/µL ÷ 1000. No in-flight samples, no TERRA, sample clock times unknown. Different people from the Twins Study — never paired. |
+| [Crucian et al. 2015](https://pmc.ncbi.nlm.nih.gov/articles/PMC5515498/) | text verified | Timing windows and qualitative findings | n=23. L-180 baseline chosen because later pre-flight samples may reflect pre-mission stress. WBC/granulocytes up in flight; lymphocytes/monocytes unaltered; landing surge. Values only in figures — no counts imported. |
+| [NASA-STD-3001 §4.8](https://www.nasa.gov/reference/4-0-human-performance/) | text verified | Context only | Career limit: effective dose < 600 mSv (NASA Q). BFO 30-day 250 mGy-Eq, 1-year 500 mGy-Eq. |
+| [NTRS 20160009163](https://ntrs.nasa.gov/api/citations/20160009163/downloads/20160009163.pdf) | reachable, not parsed | — | No values taken. |
+| [NOAA SEP catalog](https://umbra.nascom.nasa.gov/SEP/) | bundled | Event markers | GOES >10 MeV flux (pfu), not ISS dose; no attribution of station peaks. |
+| combined_radiation_report.pdf (team) | attachment | Graph structure, illustrative projection references | See corrections below. |
 
-- Detector: https://visualization.osdr.nasa.gov/radlab/gui/knowledgebase/DosTel1
-- API units: https://visualization.osdr.nasa.gov/radlab/gui/data-api/
-- Exact query and SHA256: `aerol/data/snapshot.json` → `provenance.radiation`
+## Corrections applied to the combined report
 
-`iss-radiation.csv.gz` preserves the complete downloaded CSV. Decompress it with
-Python's gzip library or an archive utility. It contains timestamps, instrument
-IDs, absorbed dose rate (µGy/h) and spacecraft. Measurements are environmental,
-not Scott Kelly's personal dosimeter record. NASA hosts data from international
-instrument partners; hosting does not imply every instrument is NASA-built.
+- Its deep-space TERRA/WBC curves are illustrative projections, stored as `digitized_reference` of a projection — not measured outcomes.
+- Radiation shares (TERRA 60%, WBC/granulocytes 10%, lymphocytes 0%) and post-flight fractions are adjustable assumptions, not constants.
+- The 340-day constant-rate total (625.60 mSv) and the 6-month projection (≈335 mSv) use different durations and are not merged.
+- 1.84 mSv/day is a historical deep-space cruise reference (MSL RAD), not a TERRA measurement, a universal rate or a safety threshold.
+- The Twins Study was on the ISS; a deep-space version is hypothetical. Its 625.6 mSv is compared with nothing — the actual mission recorded 146.34 mSv effective dose.
+- The report’s “104% of the 600 mSv career limit” compares a dose-equivalent arithmetic total with an effective-dose limit; AEROL does not show that percentage.
+- The report has no landing-day TERRA value; none is fabricated (the simulation does not plan a TERRA sample at R+0).
+- “NASA limits one event to 250 mSv” does not match the standard’s quantity: 250 mGy-Eq is a 30-day blood-forming-organ limit.
+- A pre-flight TERRA rise from psychological stress is a requested hypothesis, labeled as such everywhere.
+- The report’s “ISS (original)” WBC % values are read by eye (±5 pp); their upstream source and baseline are not stated.
 
-The plotted daily values are time-weighted means from trapezoidal integration
-of successive readings separated by no more than 600 seconds. Long gaps remain
-missing. Observed dose is divided by observed hours. Daily plotting and matched
-correlations require ≥80% coverage; coverage remains available in source records.
-No duplicates, negative rates or missing values were found in this mission export.
+## Not verified / open items
 
-## TERRA
+- RadLab API documentation (server error at check time).
+- Exact sample clock times for TERRA and Inspiration4 CBC.
+- Specimen type for the TERRA supplementary values (left null).
+- Device placement of the Twins “physical dosimeter” (recorded as `unspecified`).
+- No hardware integration exists: the wristband and dosimeter are simulated; BLE/real-time links are not implemented.
 
-Al-Turki et al. (2024), DOI 10.1038/s42003-024-06014-x.
-https://www.nature.com/articles/s42003-024-06014-x
-
-Supplementary Data 2, TW subject, canonical UUAGGG normalized RNA motif abundance.
-Eight in-flight values and three postflight values. The paper is CC BY 4.0;
-retain attribution to its authors and identify derived transformations. Display
-values multiply source abundance by 1,000 only. HR preflight observations belong
-to the ground twin, not Scott's personal preflight baseline.
-
-Calendar mapping: NASA NTRS 20160012724, slide 24.
-https://ntrs.nasa.gov/citations/20160012724
-Each FD date agrees with March 27, 2015 plus FD days. Collection clock times are
-not verified. Postflight dates use March 2, 2016 plus R+ days and are labeled as
-derived dates; they are excluded from contemporaneous ISS associations.
-
-## Exploratory association
-
-This is a new descriptive analysis, not a NASA-published correlation. Primary:
-preceding seven-day mean dose rate, midnight sample-date cutoff, DosTel1. DosTel2,
-1/30-day windows and +/-1-day cutoffs are sensitivity checks. The +1-day cutoff
-includes the sample date and may include exposure after a blood draw.
-
-Seven-day primary Pearson r ≈0.810 (DosTel1) and ≈0.859 (DosTel2), n=7 per
-detector. FD334 has only about 78% coverage and is excluded. Linear-time-adjusted
-descriptive r ≈0.210 and ≈0.587. One astronaut, serial samples, environmental
-exposure proxies and common time trends preclude causal or clinical conclusions.
-FD192 coincides with a post-vaccination collection on NASA's timeline.
-
-Original Twins Study: https://pmc.ncbi.nlm.nih.gov/articles/PMC7580864/
-It reports a 76.18 mGy physical dosimeter mission dose. This app does not spread
-that total over days or use it to calibrate TERRA or station detector rates.
-
-## Solar event markers
-
-NOAA solar proton event catalog hosted by NASA:
-https://umbra.nascom.nasa.gov/SEP/
-Five events during the downloaded interval: June 18, June 21, June 26 and
-October 29, 2015; January 2, 2016. Peak flux is GOES >10 MeV proton flux in pfu,
-not ISS dosimetry. A marker does not attribute a station peak to solar particles.
-The June 21 event peaked June 22 at 19:00 UTC (1,070 pfu). June 9 and July 27
-TERRA samples cannot resolve an acute response to that event.
-
-## Measurement semantics
-
-- HRV method: RMSSD is the square root of mean squared successive NN differences.
-  https://onlinelibrary.wiley.com/doi/full/10.1111/psyp.14604
-- FDA pulse oximetry information:
-  https://www.fda.gov/medical-devices/products-and-medical-procedures/pulse-oximeters
-  A medical-grade comparator is useful for confirmation; it does not by itself
-  establish full clinical calibration of a new wrist sensor algorithm.
-
-No local crew readings are bundled. No bone measurements are included.
-Public data retain their original provider terms; the MIT code license does not
-relicense NASA-hosted international datasets.
+Public data keep their providers’ terms; the MIT code license does not relicense them.

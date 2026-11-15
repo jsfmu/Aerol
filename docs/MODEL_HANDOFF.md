@@ -1,3 +1,6 @@
+> The browser runs a transparent simulator (see MODEL.md); this adapter is the slot for a future
+> **learned** model. It stays disabled until matched longitudinal data exist (requirements in MODEL.md).
+
 # Model integration handoff
 
 The team owns model training, model artifacts and validation. The app provides a

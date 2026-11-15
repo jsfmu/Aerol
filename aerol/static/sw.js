@@ -1,9 +1,13 @@
-const VERSION='aerol-v1';
-const SHELL=['/','/mobile/','/styles.css','/app.js','/manifest.webmanifest','/icons/icon.svg','/icons/icon-192.png','/icons/icon-512.png','/data-snapshot.json'];
-self.addEventListener('install',event=>{event.waitUntil(caches.open(VERSION).then(cache=>cache.addAll(SHELL)));self.skipWaiting();});
-self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==VERSION).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
-self.addEventListener('fetch',event=>{
- const url=new URL(event.request.url);
- if(url.origin!==self.location.origin||event.request.method!=='GET'||url.pathname.startsWith('/api/')||url.pathname.startsWith('/downloads/'))return;
- event.respondWith(fetch(event.request).then(response=>{if(response.ok){const copy=response.clone();caches.open(VERSION).then(cache=>cache.put(event.request,copy));}return response;}).catch(()=>caches.match(event.request).then(cached=>cached||(event.request.mode==='navigate'?caches.match('/'):Response.error()))));
+// Offline shell: the watch simulator, alert engine and charts run entirely from these cached files.
+const VERSION = 'aerol-v2';
+const SHELL = ['/', '/earth/', '/mobile/', '/styles.css', '/manifest.webmanifest', '/icons/icon.svg', '/icons/icon-192.png', '/icons/icon-512.png', '/data/research.json',
+  '/ui/main.js', '/ui/dom.js', '/ui/transport.js', '/ui/watch.js', '/ui/watch-screens.js', '/ui/charts.js', '/ui/earth.js', '/ui/earth-timeline.js', '/ui/earth-observed.js',
+  '/core/util.js', '/core/schedule.js', '/core/radiation.js', '/core/models.js', '/core/vitals.js', '/core/rules.js', '/core/schema.js', '/core/events.js', '/core/store.js', '/core/research.js', '/core/export.js'];
+self.addEventListener('install', e => { e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL))); self.skipWaiting(); });
+self.addEventListener('activate', e => e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== VERSION).map(k => caches.delete(k)))).then(() => self.clients.claim())));
+self.addEventListener('fetch', e => {
+  const url = new URL(e.request.url);
+  if (url.origin !== self.location.origin || e.request.method !== 'GET' || url.pathname.startsWith('/api/') || url.pathname.startsWith('/downloads/')) return;
+  e.respondWith(fetch(e.request).then(r => { if (r.ok) { const copy = r.clone(); caches.open(VERSION).then(c => c.put(e.request, copy)); } return r; })
+    .catch(() => caches.match(e.request).then(hit => hit || (e.request.mode === 'navigate' ? caches.match('/') : Response.error()))));
 });

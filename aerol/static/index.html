@@ -1,13 +1,44 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#163f43"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="AEROL"><meta name="description" content="Connected research workspace for radiation, TERRA and astronaut measurements."><title>AEROL · Crew research workspace</title><link rel="manifest" href="/manifest.webmanifest"><link rel="apple-touch-icon" href="/icons/icon-192.png"><link rel="icon" href="/icons/icon.svg" type="image/svg+xml"><link rel="stylesheet" href="/styles.css"></head>
-<body><a class="skip" href="#workspace">Skip to dashboard</a><div class="app-shell">
-<aside class="sidebar"><a class="brand" href="/" aria-label="AEROL dashboard"><span class="aerol-mark">◉</span><span>AEROL<small>CREW RESEARCH</small></span></a><p class="nav-label">WORKSPACE</p><nav id="navigation" aria-label="Workspace"><button data-view="overview" class="active">◫ <span>Overview</span></button><button data-view="radiation">☀ <span>Radiation &amp; TERRA</span></button><button data-view="measurements">♡ <span>Measurements</span></button><button data-view="model">⌘ <span>Model</span></button><button data-view="followup">✓ <span>Follow-up</span></button></nav><div class="sidebar-bottom"><span class="connection-dot"></span><span id="connection-label">Connecting to Python API</span><p>Historical NASA reference<br>Local crew workspace</p><button id="install-button" hidden>Install phone app</button><a href="/mobile/">Open mobile layout ↗</a></div></aside>
-<div class="main-shell"><header class="topbar"><div><span class="eyebrow">MISSION HEALTH / RESEARCH WORKSPACE</span><span class="top-context">See the exposure. Connect the response.</span></div><div class="top-actions"><span class="chip" id="data-status">NASA data included</span><button class="icon-button" id="theme-toggle" aria-label="Switch color theme">◐</button><span class="avatar" aria-label="Crew workspace">CW</span></div></header>
-<main id="workspace"><div class="page-heading"><div><p class="eyebrow" id="page-kicker">ONE CONNECTED WORKSPACE</p><h1 id="page-title">The bigger picture.</h1><p id="page-subtitle">Radiation, molecular response and crew measurements—each with its source.</p></div><button class="button primary" id="add-reading">+ Add measurement</button></div>
-<div id="load-error" class="notice error" role="alert" hidden></div>
-<section class="filterbar" aria-label="Historical radiation controls"><div class="reference-label"><span class="tiny-dot"></span><div><strong>NASA historical reference</strong><small>ISS · Scott Kelly mission dates</small></div></div><label>Detector<select id="detector"><option>DosTel1</option><option>DosTel2</option></select></label><label>View through<input id="as-of" type="date" value="2015-06-30" min="2015-03-28" max="2016-03-02"></label><label>Timeline<select id="timeline-days"><option value="14">14 days</option><option value="30" selected>30 days</option><option value="90">90 days</option><option value="365">Full mission</option></select></label><button class="button quiet" id="reset-view">Reset view</button></section>
-<div id="overview-view" class="view"></div><div id="radiation-view" class="view" hidden></div><div id="measurements-view" class="view" hidden></div><div id="model-view" class="view" hidden></div><div id="followup-view" class="view" hidden></div>
-<footer class="footer"><span>AEROL research prototype · No live mission connection</span><button class="text-button" id="sources-button">Data sources &amp; methods ↗</button></footer>
-</main></div></div>
-<dialog id="reading-dialog"><form id="reading-form"><div class="dialog-heading"><div><p class="eyebrow">LOCAL CREW WORKSPACE</p><h2>Add a measurement</h2></div><button type="button" class="icon-button" data-close="reading-dialog" aria-label="Close">×</button></div><p class="muted">Saved separately from Scott’s historical NASA data.</p><label>Measurement<select id="reading-metric" required></select></label><p id="metric-method" class="helper"></p><div class="form-grid"><label>Value<input id="reading-value" type="number" step="any" required></label><label>Personal baseline (optional)<input id="reading-baseline" type="number" step="any"></label></div><div class="form-grid"><label>Source<select id="reading-source"><option value="manual">Manual entry</option><option value="device">Device</option><option value="laboratory">Laboratory</option></select></label><label>Collection time<input id="reading-time" type="datetime-local" required></label></div><label>Device / assay<input id="reading-device" maxlength="120" placeholder="Device name or assay identifier"></label><label>Context<input id="reading-note" maxlength="500" placeholder="Signal quality, vessel, posture or collection context"></label><div id="reading-error" class="notice error" role="alert" hidden></div><div class="dialog-actions"><button type="button" class="button" data-close="reading-dialog">Cancel</button><button class="button primary" type="submit">Save measurement</button></div></form></dialog>
-<dialog id="sources-dialog"><div class="dialog-heading"><h2>Sources &amp; methods</h2><button class="icon-button" data-close="sources-dialog" aria-label="Close">×</button></div><div id="source-content"></div></dialog><div id="toast" class="toast" role="status" hidden></div><script src="/app.js" defer></script></body></html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f2a2d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="AEROL">
+<meta name="description" content="AEROL: an astronaut watch that recognizes changes, delivers exposure alerts and says when to get checked — connected to TERRA, WBC and radiation research tools on Earth. Research prototype with simulated devices.">
+<title>AEROL · Astronaut watch &amp; Earth research</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="appbar">
+  <a class="brand" href="/" aria-label="AEROL home"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="22" fill="none" stroke="currentColor" stroke-width="7"/><ellipse cx="50" cy="50" rx="44" ry="17" fill="none" stroke="currentColor" stroke-width="4" transform="rotate(-35 50 50)" opacity=".7"/><circle cx="83" cy="27" r="6" fill="#e8b876"/></svg><span>AEROL</span></a>
+  <nav class="modeswitch" aria-label="Experience">
+    <a href="/" data-route="watch">Astronaut watch</a>
+    <a href="/earth/" data-route="earth">Earth research dashboard</a>
+  </nav>
+  <div class="appbar-status" id="appbar-status" aria-live="polite"></div>
+</header>
+
+<section class="transport" id="transport" aria-label="Mission timeline (shared simulation clock)"></section>
+
+<main id="main">
+  <div id="watch-app" class="route" hidden></div>
+  <div id="earth-app" class="route" hidden></div>
+</main>
+
+<footer class="sitefoot">
+  <span>AEROL research prototype · <b>Simulated devices</b>: proposed AEROL wristband and a simulated connected personal dosimeter. No real hardware is connected and no message reaches a real person. Not a medical device; no NASA endorsement.</span>
+  <span id="foot-data"></span>
+</footer>
+
+<div id="toast" class="toast" role="status" hidden></div>
+<dialog id="dialog" aria-labelledby="dialog-title"><div id="dialog-body"></div></dialog>
+<noscript><p class="noscript">AEROL needs JavaScript for the watch simulator and research dashboard.</p></noscript>
+<script type="module" src="/ui/main.js"></script>
+</body>
+</html>

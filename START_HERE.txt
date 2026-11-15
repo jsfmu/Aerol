@@ -1,20 +1,11 @@
-AEROL — EDITABLE TEAM SOURCE
+AEROL — ASTRONAUT WATCH + EARTH RESEARCH DASHBOARD
 
-1. Unzip this entire folder.
-2. Install Python 3.10 or newer if needed.
-3. Open a terminal in aerol-team-kit and run:
-   python3 -m aerol
-4. Open http://127.0.0.1:8000/
-   Phone layout: http://127.0.0.1:8000/mobile/
+1. Install Python 3.9 or newer (no extra packages needed).
+2. In this folder run:   python3 -m aerol
+3. Open http://127.0.0.1:8000/        (astronaut watch + demo walkthrough)
+        http://127.0.0.1:8000/earth/  (Earth research dashboard)
+        http://127.0.0.1:8000/mobile/ (watch only, phone)
 
-EDIT THESE FILES
-- Dashboard behavior: aerol/static/app.js
-- Dashboard appearance: aerol/static/styles.css
-- Desktop / phone entry points: aerol/static/index.html and mobile.html
-- Python API and storage: aerol/server.py
-- Connect the prediction model: aerol/model_adapter.py
-
-Read README.md and docs/MODEL_HANDOFF.md before connecting a model.
-No third-party dependencies are needed to run this starter.
-The prediction model is an integration stub; no trained model is supplied.
-NASA source data and provenance are included.
+Read README.md, then docs/DEMO.md for the 7-step demo.
+All devices are simulated. Not a medical device. No real messages are sent.
+Tests: python3 -m unittest discover -s tests    and    node --test tests/js/*.test.mjs

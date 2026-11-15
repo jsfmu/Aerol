@@ -11,6 +11,9 @@ from pathlib import Path
 import sqlite3
 from datetime import datetime, timedelta, timezone
 
+from . import schema as record_schema
+from . import radiation as rad
+
 ROOT = Path(__file__).resolve().parent
 STATIC = ROOT / 'static'
 DATA = ROOT / 'data'
@@ -60,7 +63,10 @@ def connection():
       device TEXT NOT NULL, note TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS tasks (
       id INTEGER PRIMARY KEY, kind TEXT NOT NULL, status TEXT NOT NULL,
-      created_at TEXT NOT NULL, note TEXT NOT NULL);''')
+      created_at TEXT NOT NULL, note TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS records (
+      record_id TEXT PRIMARY KEY, schema_version TEXT NOT NULL, value_origin TEXT,
+      body TEXT NOT NULL, stored_at TEXT NOT NULL);''')
     return con
 
 
@@ -212,9 +218,62 @@ def prediction(body):
             'forecast_date': (datetime.fromisoformat(inputs['as_of'])+timedelta(days=inputs['horizon_days'])).date().isoformat()}
 
 
+def validate_records(body):
+    records = body.get('records')
+    if not isinstance(records, list) or not 1 <= len(records) <= 2000:
+        raise APIError('Provide "records": a list of 1–2,000 records')
+    return record_schema.validate_batch(records)
+
+
+def store_records(body):
+    result = validate_records(body)
+    if not result['valid']:
+        raise APIError('Validation failed: ' + '; '.join(
+            f"{r['record_id']}: {', '.join(r['errors'])}" for r in result['results'] if r['errors'])[:2000], 422)
+    with connection() as con:
+        for r in body['records']:
+            rid = r.get('record_id') or r.get('event_id')
+            con.execute('INSERT OR REPLACE INTO records(record_id,schema_version,value_origin,body,stored_at) VALUES(?,?,?,?,?)',
+                        (rid, r['schema_version'], r.get('value_origin'), json.dumps(r, allow_nan=False), now()))
+    return {'stored': len(body['records']), 'valid': True}
+
+
+def list_records():
+    with connection() as con:
+        rows = [dict(r) for r in con.execute('SELECT body FROM records ORDER BY stored_at DESC LIMIT 2000')]
+    return {'records': [json.loads(r['body']) for r in rows]}
+
+
+def integrate(body):
+    readings = body.get('readings')
+    if not isinstance(readings, list) or not 1 <= len(readings) <= 50000:
+        raise APIError('Provide "readings": a list of 1–50,000 dosimeter readings')
+    gap = body.get('max_gap_hours', 2)
+    if not isinstance(gap, (int, float)) or isinstance(gap, bool) or not 0 < gap <= 72:
+        raise APIError('max_gap_hours must be between 0 and 72')
+    transitions = body.get('transitions', [])
+    if not isinstance(transitions, list):
+        raise APIError('transitions must be a list of epoch-millisecond timestamps')
+    return {**rad.ingest_readings(readings, gap, transitions), 'worked_checks': rad.worked_checks(),
+            'quantity': 'dose equivalent (mSv); absorbed dose units are rejected rather than relabeled'}
+
+
 def api(method, path, body):
     if method == 'GET' and path == '/api/health':
-        return {'status': 'ok', 'version': '1.0.0'}
+        return {'status': 'ok', 'version': '2.0.0'}
+    if method == 'GET' and path == '/api/schema':
+        return {'versions': list(record_schema.VALIDATORS), 'value_origins': record_schema.VALUE_ORIGINS,
+                'shared_fields': record_schema.SHARED_FIELDS, 'terra_fields': record_schema.TERRA_FIELDS,
+                'wbc_fields': record_schema.WBC_FIELDS, 'radiation_fields': record_schema.RADIATION_FIELDS,
+                'event_fields': record_schema.EVENT_FIELDS}
+    if method == 'POST' and path == '/api/records/validate':
+        return validate_records(body)
+    if path == '/api/records' and method == 'POST':
+        return store_records(body)
+    if path == '/api/records' and method == 'GET':
+        return list_records()
+    if method == 'POST' and path == '/api/radiation/integrate':
+        return integrate(body)
     if method == 'GET' and path == '/api/bootstrap':
         return {**SNAPSHOT, 'metrics': list(REGISTRY.values()), 'crew': readings(), 'model': model_status()}
     if method == 'GET' and path == '/api/readings':
@@ -264,8 +323,9 @@ def application(environ, start_response):
                     raise APIError('Content-Type must be application/json', 415)
                 try:
                     length = int(environ.get('CONTENT_LENGTH', '0') or '0')
-                    if not 0 < length <= 65536:
-                        raise APIError('JSON body must be 1–65,536 bytes', 413)
+                    limit = 4_000_000 if path in ('/api/records', '/api/records/validate', '/api/radiation/integrate') else 65536
+                    if not 0 < length <= limit:
+                        raise APIError(f'JSON body must be 1–{limit:,} bytes', 413)
                     body = json.loads(environ['wsgi.input'].read(length))
                 except (ValueError, UnicodeError):
                     raise APIError('Invalid JSON')
@@ -276,7 +336,8 @@ def application(environ, start_response):
         else:
             if method != 'GET':
                 raise APIError('Method not allowed', 405)
-            route = {'/': 'index.html', '/mobile': 'mobile.html', '/mobile/': 'mobile.html',
+            route = {'/': 'index.html', '/mobile': 'index.html', '/mobile/': 'index.html',
+                     '/earth': 'index.html', '/earth/': 'index.html',
                      '/downloads/iss-radiation.csv.gz': '../data/iss-radiation.csv.gz'}.get(path)
             if path == '/downloads/iss-radiation.csv.gz':
                 file = DATA / 'iss-radiation.csv.gz'
@@ -287,7 +348,9 @@ def application(environ, start_response):
             if not file.is_file():
                 raise APIError('Not found', 404)
             payload = file.read_bytes()
-            mime = 'application/manifest+json' if file.suffix == '.webmanifest' else mimetypes.guess_type(file.name)[0] or 'application/octet-stream'
+            mime = ('application/manifest+json' if file.suffix == '.webmanifest' else
+                    'text/javascript' if file.suffix in ('.js', '.mjs') else
+                    mimetypes.guess_type(file.name)[0] or 'application/octet-stream')
             headers += [('Content-Type', mime), ('Cache-Control', 'no-cache')]
     except APIError as error:
         payload = json.dumps({'error': error.message}).encode()

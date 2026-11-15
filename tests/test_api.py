@@ -97,9 +97,40 @@ class APITests(unittest.TestCase):
             self.assertEqual(self.request('/api/readings')[0],401)
             self.assertEqual(self.request('/api/readings',extra={'HTTP_AUTHORIZATION':'Bearer test-token'})[0],200)
 
-    def test_both_entry_points_and_manifest(self):
-        self.assertEqual(self.request('/')[0],200)
-        self.assertEqual(self.request('/mobile/')[0],200)
-        self.assertEqual(self.request('/manifest.webmanifest')[0],200)
+    def test_entry_points_modules_and_manifest(self):
+        for path in ('/','/mobile/','/earth/','/earth','/manifest.webmanifest','/data/research.json','/ui/main.js','/core/store.js'):
+            self.assertEqual(self.request(path)[0],200,path)
+        env={};setup_testing_defaults(env);env.update(PATH_INFO='/core/store.js',REQUEST_METHOD='GET')
+        headers=[]
+        b''.join(server.application(env,lambda st,h:headers.extend(h)))
+        self.assertIn(('Content-Type','text/javascript'),headers)
+
+    def test_records_validate_store_and_reject(self):
+        fx=json.loads((Path(__file__).parent/'fixtures'/'records.json').read_text())
+        status,data=self.request('/api/records/validate',{'records':fx['valid']})
+        self.assertEqual(status,200);self.assertTrue(data['valid'])
+        status,data=self.request('/api/records',{'records':fx['valid']})
+        self.assertEqual(status,200);self.assertEqual(data['stored'],len(fx['valid']))
+        self.assertEqual(len(self.request('/api/records')[1]['records']),len(fx['valid']))
+        status,data=self.request('/api/records',{'records':[fx['invalid'][0]['record']]})
+        self.assertEqual(status,422)
+        status,data=self.request('/api/records/validate',{'records':fx['leakage_batch']})
+        self.assertFalse(data['valid']);self.assertIn('future leakage',' '.join(data['results'][1]['errors']))
+
+    def test_schema_endpoint_fixes_terra_version(self):
+        status,data=self.request('/api/schema')
+        self.assertEqual(status,200);self.assertIn('aerol.terra.v1',data['versions'])
+        self.assertEqual(data['value_origins'],['observed','digitized_reference','model_prediction','simulation'])
+
+    def test_radiation_integration_endpoint(self):
+        H=3600000
+        readings=[{'t':i*H,'device_id':'d','kind':'cumulative','unit':'mSv','value':0.7*i/24} for i in range(25)]
+        readings.append(dict(readings[5]))
+        status,data=self.request('/api/radiation/integrate',{'readings':readings})
+        self.assertEqual(status,200);self.assertAlmostEqual(data['total_mSv'],0.7,places=9)
+        self.assertEqual(data['duplicates_dropped'],1)
+        self.assertTrue(all(c['pass'] for c in data['worked_checks']))
+        status,data=self.request('/api/radiation/integrate',{'readings':[{'t':0,'device_id':'x','kind':'rate','unit':'µGy/h','value':8.1}]})
+        self.assertEqual(len(data['rejected']),1)
 
 if __name__=='__main__':unittest.main()

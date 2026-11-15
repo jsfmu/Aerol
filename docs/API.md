@@ -16,6 +16,12 @@ Dates are ISO 8601. A collection timestamp includes `Z` or a UTC offset.
 | POST | /api/features | Radiation feature payload without inference |
 | POST | /api/predict | Invoke the installed team model |
 | GET | /api/health | Readiness check |
+| GET | /api/schema | Record contract versions and field lists (`aerol.terra.v1`, `aerol.wbc.v1`, `aerol.radiation.v1`, `aerol.event.v1`) |
+| POST | /api/records/validate | Validate `{"records":[...]}` (same rules as the browser; detects future leakage) |
+| POST / GET | /api/records | Store validated records in SQLite (422 if any record is invalid) / list stored records |
+| POST | /api/radiation/integrate | Integrate dosimeter readings `{"readings":[{t, device_id, kind, value, unit}], "transitions":[t...]}` → total, increments, gaps, resets, duplicates, worked checks |
+
+Static routes: `/` (watch), `/earth/` (Earth dashboard), `/mobile/` (watch only), `/data/research.json`.
 
 Example reading:
 
@@ -57,3 +63,6 @@ Statuses: `planned`, `logged`, `complete`. Logs are appended, not sent externall
 
 SQLite data are stored in `local-data/aerol.sqlite3` unless `AEROL_DB` is set.
 This is a single-workspace starter, not a multi-tenant clinical record system.
+
+Dosimeter units accepted by `/api/radiation/integrate`: rates in `mSv/day` or `µSv/h`, cumulative
+counters in `mSv` or `µSv` (dose equivalent). Gy-based readings are rejected, not relabeled.

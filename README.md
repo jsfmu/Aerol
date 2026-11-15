@@ -1,115 +1,90 @@
-# AEROL team starter
+# AEROL — astronaut watch + Earth research dashboard
 
-One interactive crew dashboard, a phone web-app layout, and a shared Python backend.
-No bone-health features. No invented wearable readings or built-in TERRA predictor.
+**A watch that helps astronauts recognize changes, receive exposure alerts, and know when to get
+checked — connected to research tools on Earth.**
 
-## Run in two steps
+NASA Space Apps Challenge prototype. Python (standard library) backend with SQLite, and a
+dependency-free HTML/CSS/JavaScript front end. All devices are **simulated**: the proposed AEROL
+wristband and a connected personal dosimeter. No real hardware is connected, no message reaches a
+real person, and nothing here is a medical device or implies NASA endorsement.
 
-Requires Python 3.10+; the app has no third-party Python or JavaScript dependencies.
-
-```sh
-cd Aerol
-python3 -m aerol
-```
-
-- Desktop: http://127.0.0.1:8000/
-- Phone layout: http://127.0.0.1:8000/mobile/
-- API health: http://127.0.0.1:8000/api/health
-
-Both layouts use the same live Python API. The mobile path is an installable PWA,
-not a native iOS/Android binary. All scripts, styles, icons and historical data are local.
-
-## What works
-
-- Interactive ISS radiation timeline with detector, date and duration controls.
-- Solar-proton-event catalog markers, explicitly separated from ISS dose measurements.
-- Actual dated Scott Kelly TERRA points and selectable exploratory correlations.
-- Wearable readings: HR, RHR, RMSSD, estimated respiratory rate, wrist SpO2,
-  skin temperature, acceleration and rotation.
-- External readings: confirmed SpO2, blood pressure, ultrasound blood-flow velocity,
-  WBC with full absolute differential, CRP, personal dosimetry and laboratory TERRA.
-- Measurement entry, optional personal baseline, source, collection time and notes.
-- Corrected-NN RMSSD calculation and three-axis motion calculation APIs.
-- Local SQLite follow-up log and illustrative wristband alert walkthrough.
-- Model input construction, quality checks, inference adapter and forecast UI.
-- Offline public historical reference after the first successful online visit.
-
-Stress, sleep and recovery are shown as unavailable until their own algorithms are
-implemented. The website does not acquire raw PPG, ECG, cuff or lab data by itself:
-the device team sends records through the API. See docs/API.md.
-
-## Connect your prediction model
-
-Edit `aerol/model_adapter.py`. Load your model once in that module, implement
-`is_ready()` and `predict(features, horizon_days)`, and update `MODEL_INFO`.
-Alternatively set `AEROL_MODEL_MODULE=your_package.your_adapter` before startup.
-
-The model receives radiation features from the chosen historical ISS window.
-Return the raw normalized TERRA abundance, not the UI's x1,000 display value:
-
-```python
-def predict(features, horizon_days):
-    # Run your trained model here.
-    return {"value": your_prediction, "explanation": your_summary}
-```
-
-`POST /api/predict` returns HTTP 503 until a model is installed. The supplied app
-does not fit a model to the eight Scott samples or turn r into a dose-response curve.
-Local crew vital signs are not silently joined to Scott's historic exposure. Extend
-the input contract only when you have correctly matched subjects and timestamps.
-See docs/MODEL_HANDOFF.md for units, response schema and an integration example.
-
-## Open on a phone
-
-For a browser preview on the same Wi-Fi:
+## Run
 
 ```sh
-python3 -m aerol --host 0.0.0.0 --port 8000
+python3 -m aerol            # Python 3.9+; no third-party packages
 ```
 
-Visit `http://YOUR_COMPUTER_LAN_IP:8000/mobile/` on the phone. Do not enter 0.0.0.0
-as the phone's destination. A local HTTP LAN preview can display the app but does
-not normally enable service-worker/PWA installation. Use HTTPS hosting for a
-phone installation. In Safari use Share → Add to Home Screen; in Chrome use its
-Install app menu when available. A manifest and 192/512px icons are included.
+| URL | Experience |
+|---|---|
+| http://127.0.0.1:8000/ | **Astronaut watch** simulator + demo walkthrough |
+| http://127.0.0.1:8000/earth/ | **Earth research dashboard** (physicians & researchers) |
+| http://127.0.0.1:8000/mobile/ | Watch only (phone layout) |
 
-The bundled WSGI development server is for local demonstration. For hosting, serve
-`aerol.server:application` with a production WSGI server behind HTTPS. Preserve the
-root URL paths. Set a persistent `AEROL_DB` file path for records. If API access
-needs a token, set `AEROL_API_TOKEN`; enter it in the model screen to connect.
-Keep authentication at the hosting layer before using non-public crew information.
+Both experiences share one store and one simulation clock (synced across tabs), so the watch and
+the dashboard never disagree. The ground view is deliberately delayed by simulated packets.
 
-## Data included
+## Demo walkthrough (≈3 minutes)
 
-`aerol/data/iss-radiation.csv.gz` contains all **585,235** original public NASA
-RadLab rows (DosTel1 and DosTel2, March 27, 2015 through March 2, 2016). The app
-uses derived daily summaries for responsive rendering. Source URLs, SHA256,
-data units and methods are in `aerol/data/snapshot.json` and docs/DATA.md.
+Use the **Demo walkthrough** panel on the watch page:
 
-TERRA is a normalized UUAGGG RNA motif abundance, not telomere length or a DNA
-injury score. Station dosimetry is not personal dosimetry. Associations are
-exploratory, one astronaut, and confounded by common time trends.
+1. **Watch status** — FD18, inside the magnetosphere; Home shows mission time, recovery estimate, status, top action.
+2. **Mission progression** — the shared clock plays; it auto-pauses when a new alert fires.
+3. **Exposure change** — belt transit then magnetosphere exit (explicit trajectory events); 0.7 → 1.84 mSv/day.
+4. **Actionable watch alert** — what changed, the reading, threshold, status, one next action.
+5. **Health-check workflow** — sustained resting-HR rise escalates to Caution during a simulated comm outage: record symptoms, begin follow-up, contact onboard crew medical support.
+6. **Earth research review** — queued packets arrive; physicians review and message back; researchers inspect TERRA/WBC projections.
+7. **Landing and recovery** — dose plateaus, R+0 WBC result (simulated lab) triggers a configured-change review, TERRA relaxes toward 1.0×.
+
+More detail: [docs/DEMO.md](docs/DEMO.md).
+
+## What is real, what is simulated
+
+| Layer | Origin |
+|---|---|
+| NASA RadLab ISS DosTel1/2 absorbed dose rate (µGy/h, area monitors) | observed, bundled |
+| Twins Study TERRA (subject TW, 11 samples, raw normalized abundance) | observed, bundled |
+| Inspiration4 CBC (OSD-569, 4 crew, L-92…R+194, 10⁹/L) | observed, bundled |
+| ISS immune study timing & findings (Crucian 2015, n=23) | published finding, qualitative only |
+| “ISS (original)” WBC % from the team’s combined report | digitized_reference (±5 pp) |
+| Watch vitals, dosimeter, lab draws, TERRA/WBC curves | **simulation** |
+| Learned TERRA/WBC model | **unavailable** — insufficient matched data |
+
+Sources, verification status and caveats: [docs/DATA.md](docs/DATA.md).
+
+## Key design rules
+
+- The watch never measures TERRA or WBC (laboratory assays). Radiation comes from a simulated personal dosimeter.
+- Six canonical phases (`preflight | early_flight | mid_flight | late_flight | landing | after_return`) are separate from exposure regions (`ground | inside_magnetosphere | radiation_belt_transit | beyond_magnetosphere | unknown`) and from events.
+- r(t) = dD/dt; dose is integrated over real elapsed time, split at transitions, and plateaus after landing.
+- TERRA baseline: 1.0× = 0% change. Fold change = value ÷ matched personal baseline.
+- Alerts: versioned rule registry, persistence windows, episode tracking/cooldowns, escalation on worsening; acknowledgment never resolves; a recovery score never suppresses an alert; missing data never shows “all clear”.
+- No bone-density features.
+
+Model and scoring: [docs/MODEL.md](docs/MODEL.md). Record contract (`aerol.terra.v1` etc.): [docs/SCHEMA.md](docs/SCHEMA.md). API: [docs/API.md](docs/API.md).
 
 ## Tests
 
 ```sh
-python3 -m unittest discover -s tests -v
+python3 -m unittest discover -s tests -v     # API, schema parity, radiation integration (20 tests)
+node --test tests/js/*.test.mjs              # JS core: phases, dose math, models, alerts, link, schema (16 tests)
 ```
 
-Unit tests cover provenance, persistence, validation, HRV, motion, matched-feature
-calculations, missing coverage, model integration, token enforcement and routes.
-No simulator alert is a live mission instruction. Data entry and logs stay local;
-the app does not send messages or contact flight operations.
+Rebuild the observed-data bundle after changing source files: `python3 scripts/build_research_data.py`
+(every record is validated before writing). Regenerate validator fixtures: `node scripts/make_fixtures.mjs`.
 
-## Files to give the team
+## Layout
 
-- `aerol/server.py`: Python API, SQLite storage, validation and radiation features.
-- `aerol/model_adapter.py`: replace with the team's inference code.
-- `aerol/static/index.html`, `mobile.html`, `app.js`, `styles.css`: both interfaces.
-- `aerol/static/sw.js`, `manifest.webmanifest`, `icons/`: PWA installation/offline shell.
-- `aerol/data/`: full source readings and display/reference data.
-- `docs/`: API examples, model contract, scientific provenance and limitations.
+```
+aerol/server.py            WSGI app: static routes, records API, radiation integration, legacy endpoints
+aerol/schema.py            record validator (mirrors core/schema.js)
+aerol/radiation.py         dose integration (mirrors core/radiation.js)
+aerol/model_adapter.py     slot for a future trained model (learned mode)
+aerol/static/core/         pure JS modules (schedule, radiation, models, vitals, rules, events, store, schema, research, export)
+aerol/static/ui/           watch, transport, charts, Earth dashboard views
+aerol/static/data/         research.json (validated observed records)
+aerol/data/                source files (RadLab raw export, snapshot, OSD-569 CBC CSV)
+scripts/                   data build + fixture generation
+tests/                     Python + Node tests, shared fixtures
+```
 
-Code is MIT licensed. Research data retain their original provider terms and
-required citations; see docs/DATA.md. This package is supplied as source code,
-not a published cloud deployment.
+Code is MIT licensed. Research data keep their providers’ terms and citations (see docs/DATA.md).
