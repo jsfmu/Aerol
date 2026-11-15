@@ -1,0 +1,128 @@
+{
+  "aerol/__init__.py": {
+    "mtime": 1794734114.0,
+    "seen": 1794731182.000853,
+    "ast_hash": "bc0f7e1530103b0456211a239c9e6992",
+    "semantic_hash": "bc0f7e1530103b0456211a239c9e6992"
+  },
+  "aerol/__main__.py": {
+    "mtime": 1794734114.0,
+    "seen": 1794731182.000855,
+    "ast_hash": "ee08651564214c3c641df46a5df165b5",
+    "semantic_hash": "ee08651564214c3c641df46a5df165b5"
+  },
+  "aerol/data/snapshot.json": {
+    "mtime": 1794734114.0,
+    "seen": 1794731182.0008562,
+    "ast_hash": "6acbd2b6b58eee17b57e793dc504d447",
+    "semantic_hash": "6acbd2b6b58eee17b57e793dc504d447"
+  },
+  "aerol/model_adapter.py": {
+    "mtime": 1794734114.0,
+    "seen": 1794731182.000857,
+    "ast_hash": "67f6ec3a1ed7f47354d8c793863d2388",
+    "semantic_hash": "67f6ec3a1ed7f47354d8c793863d2388"
+  },
+  "aerol/server.py": {
+    "mtime": 1794734114.0,
+    "seen": 1794731182.000857,
+    "ast_hash": "87e40c2a8fb5a81ecd30334d22c249d8",
+    "semantic_hash": "87e40c2a8fb5a81ecd30334d22c249d8"
+  },
+  "aerol/static/app.js": {
+    "mtime": 1794734282.0,
+    "seen": 1794731182.000858,
+    "ast_hash": "72e1423643cb407ede0abdd6544f2011",
+    "semantic_hash": "72e1423643cb407ede0abdd6544f2011"
+  },
+  "aerol/static/data-snapshot.json": {
+    "mtime": 1794734114.0,
+    "seen": 1794731182.000858,
+    "ast_hash": "6acbd2b6b58eee17b57e793dc504d447",
+    "semantic_hash": "6acbd2b6b58eee17b57e793dc504d447"
+  },
+  "aerol/static/sw.js": {
+    "mtime": 1794734114.0,
+    "seen": 1794731182.0008588,
+    "ast_hash": "a4b7c3ea5875d5b90c4e9b459e2d86c6",
+    "semantic_hash": "a4b7c3ea5875d5b90c4e9b459e2d86c6"
+  },
+  "tests/test_api.py": {
+    "mtime": 1794734114.0,
+    "seen": 1794731182.0008588,
+    "ast_hash": "3c5ea4bad75791c3cbee8f9d149b3e41",
+    "semantic_hash": "3c5ea4bad75791c3cbee8f9d149b3e41"
+  },
+  "README.md": {
+    "mtime": 1794724649.373662,
+    "seen": 1794731182.0008588,
+    "ast_hash": "e53d3bba444409698bd1db10cc08d3d5",
+    "semantic_hash": "e53d3bba444409698bd1db10cc08d3d5"
+  },
+  "START_HERE.txt": {
+    "mtime": 1794734488.0,
+    "seen": 1794731182.00086,
+    "ast_hash": "24dcf4b9fd472c370acd4ca0ba35d5e6",
+    "semantic_hash": "24dcf4b9fd472c370acd4ca0ba35d5e6"
+  },
+  "aerol/static/index.html": {
+    "mtime": 1794734140.0,
+    "seen": 1794731182.00086,
+    "ast_hash": "2bc025c18bb234432d6f3f27cf2e8b80",
+    "semantic_hash": "2bc025c18bb234432d6f3f27cf2e8b80"
+  },
+  "aerol/static/mobile.html": {
+    "mtime": 1794734140.0,
+    "seen": 1794731182.000861,
+    "ast_hash": "c1fab454c9d9c15d60436651f97b5bab",
+    "semantic_hash": "c1fab454c9d9c15d60436651f97b5bab"
+  },
+  "docs/API.md": {
+    "mtime": 1794734114.0,
+    "seen": 1794731182.000861,
+    "ast_hash": "61c0dfec255965237aca7886fbab94b0",
+    "semantic_hash": "61c0dfec255965237aca7886fbab94b0"
+  },
+  "docs/DATA.md": {
+    "mtime": 1794734114.0,
+    "seen": 1794731182.000861,
+    "ast_hash": "b9529951317c97013f39e8589340af83",
+    "semantic_hash": "b9529951317c97013f39e8589340af83"
+  },
+  "docs/MODEL_HANDOFF.md": {
+    "mtime": 1794734114.0,
+    "seen": 1794731182.000862,
+    "ast_hash": "86dfa0d29232dee7f54a987a3df3daf0",
+    "semantic_hash": "86dfa0d29232dee7f54a987a3df3daf0"
+  },
+  "aerol/static/icons/icon-192.png": {
+    "mtime": 1794734020.0,
+    "seen": 1794731182.000862,
+    "ast_hash": "1480d3bcfc154b2deb6c6f5f57088a6d",
+    "semantic_hash": "1480d3bcfc154b2deb6c6f5f57088a6d"
+  },
+  "aerol/static/icons/icon-512.png": {
+    "mtime": 1794734020.0,
+    "seen": 1794731182.000862,
+    "ast_hash": "bbae99dba50c0f6c99a5832d7d4d8af9",
+    "semantic_hash": "bbae99dba50c0f6c99a5832d7d4d8af9"
+  },
+  "aerol/static/icons/icon.svg": {
+    "mtime": 1794733528.0,
+    "seen": 1794731182.000863,
+    "ast_hash": "25b97604aa5d6440f593cd0dd5500fd7",
+    "semantic_hash": "25b97604aa5d6440f593cd0dd5500fd7"
+  },
+  "desktop-preview.jpg": {
+    "mtime": 1794734324.0,
+    "seen": 1794731182.000863,
+    "ast_hash": "ebae664400f5b3776d48ca8fe3e3a181",
+    "semantic_hash": "ebae664400f5b3776d48ca8fe3e3a181"
+  },
+  "mobile-preview.jpg": {
+    "mtime": 1794734342.0,
+    "seen": 1794731182.000863,
+    "ast_hash": "e689b64640565de5ceb60f8007876288",
+    "semantic_hash": "e689b64640565de5ceb60f8007876288"
+  }
+}
