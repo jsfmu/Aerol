@@ -362,3 +362,13 @@ button.quest:hover{border-color:var(--teal)}
 .zinnia .sparkle{animation:twinkle 1.4s ease-in-out infinite}
 @keyframes twinkle{0%,100%{opacity:.3}50%{opacity:1}}
 @media (prefers-reduced-motion:reduce){.zinnia .zinnia-head,.zinnia .sparkle{animation:none}}
+/* Phase comparison charts */
+.pc-chart{width:100%;height:auto;display:block;margin-top:6px}
+.pc-chart .pc-col{fill:transparent}.pc-chart .pc-col.odd{fill:var(--panel-2)}
+.pc-chart .pc-lbl{font-size:9.5px;fill:var(--muted);text-anchor:middle}
+.pc-chart .pc-pt:hover .pc-lbl{fill:var(--ink);font-weight:700}
+.pc-note{font-size:10px;color:var(--muted);text-align:center;line-height:1.25}
+.pc-legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;margin-top:4px}
+.pc-legend i{display:inline-block;width:10px;height:10px;margin-right:6px;vertical-align:middle;transform:rotate(45deg)}
+details.panel summary{cursor:pointer;font-weight:650}
+.pc-chart .pc-lbl.hover-only{opacity:0}.pc-chart .pc-pt:hover .pc-lbl.hover-only{opacity:1}

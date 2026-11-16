@@ -11,6 +11,7 @@ import { phaseComparison, dostelRows, dostelRecord } from '../core/research.js';
 import { simulationRecords } from '../core/export.js';
 import { mountTimeline } from './earth-timeline.js';
 import { mountObserved } from './earth-observed.js';
+import { phaseCompareHtml } from './phase-compare.js';
 import { CREW_SECTIONS, crewHome, crewFollowup, crewLearn, crewActions, selfcareDashboard } from './earth-crew.js';
 import { $, esc, toast, download, throttle, openDialog } from './dom.js';
 
@@ -83,11 +84,11 @@ export function mountEarth(root, store, { research, navigate }) {
   function phasesHtml() {
     if (!research) return '<div class="notice">Observed research bundle unavailable.</div>';
     const rows = phaseComparison(research, store.model);
-    return `<section class="panel"><p class="sub">Columns align the six canonical phases. Each cell keeps its own timing labels, cohort and units — cells in the same column are <b>not</b> paired observations, and R+1, R+30 and R+99 are different times.</p>
+    return phaseCompareHtml(research, store.model) + `<details class="panel"><summary>Show as table</summary><div><p class="sub">Columns align the six canonical phases. Each cell keeps its own timing labels, cohort and units — cells in the same column are <b>not</b> paired observations, and R+1, R+30 and R+99 are different times.</p>
       <div style="overflow-x:auto;margin-top:8px"><table class="phase-table"><thead><tr><th>Dataset · cohort · origin</th>${PHASES.map(p => `<th>${esc(PHASE_LABEL[p])}</th>`).join('')}</tr></thead><tbody>
       ${rows.map(r => `<tr><td><b>${esc(r.dataset)}</b><br><span class="sub">${esc(r.cohort)}</span><br><span class="chip ${r.origin.startsWith('observed') ? 'obs' : r.origin === 'simulation' ? 'sim' : 'pred'}">${esc(r.origin)}</span> <span class="sub">${esc(r.unit)}</span><br><span class="sub">${esc(r.note)}</span></td>
         ${PHASES.map(p => { const c = r.cells[p] || []; return `<td>${c.length ? `<ul>${c.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : `<span class="none">${esc(r.empty?.[p] || '—')}</span>`}</td>`; }).join('')}</tr>`).join('')}
-      </tbody></table></div></section>`;
+      </tbody></table></div></div></details>`;
   }
 
   // ---------- Review queue + brief ----------
