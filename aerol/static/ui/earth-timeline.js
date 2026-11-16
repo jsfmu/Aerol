@@ -228,12 +228,12 @@ export function mountTimeline(host, store, ctx) {
       return;
     }
     const steps = rateSteps(m.segments).filter(s => s.t >= m.schedule.launch && s.t < m.schedule.landing);
-    parts.push(`<section class="panel"><h2>Lag inspector · how long the body takes to respond</h2><p class="sub">Time from each exposure step to the simulated TERRA response (vs a no-step counterfactual). Timestamps are never shifted.</p>
+    parts.push(`<section class="panel"><h2>Lag inspector · how long the body takes to respond</h2>
       <table><thead><tr><th>Step</th><th>Rate</th><th>Onset</th><th>50%</th></tr></thead><tbody>${steps.map(st => {
         const L = lagInspector(m, st.t);
         return L ? `<tr><td>${esc(missionLabel(m.schedule, st.t, true))}<br><span class="sub">${esc(st.region_label)}</span></td><td>${fmt(st.from, 2)}→${fmt(st.to, 2)}</td><td>${fmt(L.onset_days, 1)} d</td><td>${L.half_response_days === null ? 'not reached' : fmt(L.half_response_days, 1) + ' d'}</td></tr>` : '';
       }).join('')}</tbody></table><p class="sub">Assumed lag ${sc.terra.lag_days} d; rise τ ${sc.terra.rise_days} d; recovery τ ${sc.terra.recovery_days} d.</p></section>`);
-    parts.push(`<section class="panel"><h2>Model assumptions (what-if settings)</h2><p class="sub">Hypothesis-driven simulator — adjust and see consequences. Exposure duration: ${isNum(sc.exit_day) ? fmt(sc.reentry_day - sc.exit_day, 0) + ' days beyond the magnetosphere' : 'no exit in this scenario'}.</p>
+    parts.push(`<section class="panel"><h2>Model assumptions (what-if settings)</h2>
       ${SLIDERS.map(([path, label, min, max, step]) => {
         const v = getPath(sc, path);
         if (!isNum(v)) return `<div class="slider"><span>${esc(label)}</span><output>n/a</output></div>`;
