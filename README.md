@@ -45,7 +45,7 @@ day), a 4-week heat map and badges. Points reward habits, never vitals; reportin
 earns points; nothing rewards ignoring an alert; no crew leaderboards. Days before you start using
 the demo include clearly labeled simulated history so streaks are meaningful when jumping in time.
 
-**Zinnia garden.** A mission zinnia is planted at launch and grows from completed quests (seed →
+**Aerol Buddy.** A mission plant, your Aerol Buddy, is planted at launch and grows from completed quests (seed →
 sprout → leaves → bud → bloom, ≈ two weeks of habits per flower); each bloom joins a personal
 garden. A “Tend the garden” quest counts real plant care. The plant never wilts or dies: during a
 health alert or while the band is offline it rests. Inspired by the zinnias grown in NASA’s Veggie

@@ -19,11 +19,11 @@ export const growthOf = d => (d?.count || 0) + (d?.reports || 0);
 
 // Rest when the astronaut has an active physiological, lab or data-quality alert, or no band data.
 export function restState(model, actions, t, vitalsMissing) {
-  if (vitalsMissing) return { resting: true, reason: 'No band data right now. Your zinnia rests until it reconnects.' };
+  if (vitalsMissing) return { resting: true, reason: 'No band data right now. Your Aerol Buddy rests until it reconnects.' };
   const live = model.alerts.episodes.filter(e => ['physiological', 'lab', 'data_quality'].includes(e.category))
     .map(e => ({ e, s: episodeStatus(e, t, actions) }))
     .filter(x => x.s && x.s.active && severityRank(x.s.severity) >= 1);
-  if (live.length) return { resting: true, reason: 'Resting while you take care of yourself. Health first, the zinnia will wait.' };
+  if (live.length) return { resting: true, reason: 'Resting while you take care of yourself. Health first, your Aerol Buddy will wait.' };
   return { resting: false, reason: null };
 }
 

@@ -29,8 +29,8 @@ export const BADGES = [
   { id: 'unwind_3', label: 'Calm crew', icon: '❋', why: '3 wind-down sessions in one week' },
   { id: 'hydrated_week', label: 'Hydrated week', icon: '💧', why: 'Hydration goal met 5 days in one week' },
   { id: 'fast_ack', label: 'On it', icon: '⚑', why: 'Acknowledged an alert within an hour' },
-  { id: 'first_bloom', label: 'First bloom', icon: '🌼', why: 'Grew a zinnia from seed to flower' },
-  { id: 'garden_5', label: 'Green thumb', icon: '🌻', why: 'Five zinnias in your garden' },
+  { id: 'first_bloom', label: 'First bloom', icon: '🌼', why: 'Grew your Aerol Buddy from seed to flower' },
+  { id: 'garden_5', label: 'Green thumb', icon: '🌻', why: 'Five Aerol Buddy blooms in your garden' },
 ];
 
 const dayKey = t => Math.floor(t / DAY);

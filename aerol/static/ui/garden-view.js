@@ -54,7 +54,7 @@ export function zinniaSvg(g, size = 96, { label = true } = {}) {
   }
   if (g.resting) parts.push('<g class="rest"><circle cx="82" cy="18" r="8" fill="#cfd8ff" opacity=".85"/><circle cx="86" cy="15" r="7" fill="var(--z-bg, #000)"/><text x="66" y="14" font-size="9" fill="#cfd8ff">z</text><text x="60" y="7" font-size="7" fill="#cfd8ff">z</text></g>');
   else if (g.justBloomed) parts.push('<g class="sparkle" fill="#ffd166"><path d="M18,22 l2,5 5,2 -5,2 -2,5 -2,-5 -5,-2 5,-2z"/><path d="M82,40 l1.5,3.5 3.5,1.5 -3.5,1.5 -1.5,3.5 -1.5,-3.5 -3.5,-1.5 3.5,-1.5z"/></g>');
-  const title = `Zinnia — ${g.stage.label}${g.resting ? ' (resting)' : ''}, ${g.growth}/${BLOOM_AT} growth`;
+  const title = `Aerol Buddy — ${g.stage.label}${g.resting ? ' (resting)' : ''}, ${g.growth}/${BLOOM_AT} growth`;
   return `<svg class="zinnia" viewBox="0 0 100 120" width="${size}" height="${size * 1.2}" role="img" aria-label="${esc(title)}"${label ? `><title>${esc(title)}</title>` : '>'}${parts.join('')}</svg>`;
 }
 
@@ -70,7 +70,7 @@ export function gardenWatchCard(s) {
   const tended = s.today.done.garden;
   return `<div class="wcard garden-card">
     <div class="garden-row">${zinniaSvg(g, 54)}<div style="flex:1;min-width:0">
-      <div class="wk">Zinnia · ${esc(g.stage.label)}${g.resting ? ' · resting' : ''}</div>
+      <div class="wk">Aerol Buddy · ${esc(g.stage.label)}${g.resting ? ' · resting' : ''}</div>
       <div class="growbar"><i style="width:${Math.round(g.progress * 100)}%"></i></div>
       <div class="wmuted">${!g.planted ? 'Your seed is planted at launch.' : g.justBloomed ? 'It bloomed! Added to your garden.' : `${g.toNext} more growth to bloom`} · 🌼 ${g.blooms}</div>
       ${g.resting ? `<div class="wmuted">${esc(g.restReason)}</div>` : ''}
@@ -81,8 +81,8 @@ export function gardenWatchCard(s) {
 
 export function gardenPanel(s) {
   const g = s.garden;
-  return `<section class="panel garden-panel"><h2>My zinnia garden</h2>
-    <p class="sub">Every completed quest helps your zinnia grow (and reporting symptoms always counts). It never wilts: when you're unwell or the band is offline, it rests.</p>
+  return `<section class="panel garden-panel"><h2>My Aerol Buddy garden</h2>
+    <p class="sub">Every completed quest helps your Aerol Buddy grow (and reporting symptoms always counts). It never wilts: when you're unwell or the band is offline, it rests.</p>
     <div class="garden-hero">${zinniaSvg(g, 150)}<div>
       <div class="stat-line"><b>${esc(g.stage.label)}</b>${g.resting ? ' · <span class="chip">resting</span>' : ''}</div>
       <div class="growbar big"><i style="width:${Math.round(g.progress * 100)}%"></i></div>
