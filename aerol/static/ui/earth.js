@@ -34,7 +34,8 @@ export function mountEarth(root, store, { research, navigate }) {
     root.querySelectorAll('[data-aud]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.aud === ui.audience)));
     $('#e-navnote', root).textContent = ui.audience === 'crew'
       ? 'Your own data, onboard and current. Physicians on Earth see the same records after the link delay.'
-      : 'For astronauts and the Earth team alike. TERRA and white blood cells come from lab blood tests; the watch never measures them. Every series is labeled observed (real), digitized, model prediction or simulation.';
+      : '';
+    $('#e-navnote', root).hidden = ui.audience !== 'crew';
   }
 
   function renderHead() {
