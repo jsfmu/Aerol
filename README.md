@@ -23,7 +23,9 @@ python3 -m aerol            # Python 3.9+; no third-party packages
 Both experiences share one store and one simulation clock (synced across tabs), so the watch and
 the dashboard never disagree. The ground view is deliberately delayed by simulated packets.
 
-## Demo script for the video (≈3 minutes)
+## Demo script for the video (≈30 seconds)
+
+**▶ Watch the demo video:** [Google Drive](https://drive.google.com/file/d/1hpkrF_t9Ae5M2PgFXb28o-XAAfagRNJL/view?usp=drive_link)
 
 Drive these moments with the timeline bar (drag, ⏭ next event, ▶ play) and the watch:
 
