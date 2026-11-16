@@ -35,7 +35,7 @@ function seriesData(research, model) {
     { id: 'sim', label: `Simulation · ${model.scenario.astronaut_id}`, note: 'simulated lab draws vs L-180', origin: 'simulation', line: true,
       points: model.labs.filter(l => l.kind === 'wbc').map(l => ({ phase: l.phase, v: l.pct_from_baseline, label: l.label, t: l.t })) },
   ];
-  const crucian = { preflight: 'L-180 baseline', early_flight: 'WBC & granulocytes ↑ (significant)', mid_flight: 'elevated, not significant', late_flight: 'WBC ↑ (significant)', landing: 'WBC surge ~3 h after landing', after_return: 'R+30 sample' };
+  const crucian = { preflight: 'baseline 6 months before launch', early_flight: 'WBC & granulocytes ↑ (significant)', mid_flight: 'elevated, not significant', late_flight: 'WBC ↑ (significant)', landing: 'WBC surge ~3 h after landing', after_return: 'sample 1 month after landing' };
   return { terraPct, twins, wbcPct, crucian };
 }
 
