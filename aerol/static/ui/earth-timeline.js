@@ -33,11 +33,11 @@ export function mountTimeline(host, store, ctx) {
       <div class="toolbar" id="tl-tools"></div>
       <div class="legend" style="margin:8px 0">
         <span><span class="sw c-terra"></span>projection (dashed)</span><span><span class="shape diamond"></span>simulated lab sample</span>
-        <span>samples appear only once their result is available (draws are marked in the Samples row)</span><span><span class="sw c-terra-b"></span>comparison scenario</span><span>shaded: scenario sensitivity range</span>
+        <span>samples appear only once their result is available (draw dates: Schedule &amp; blood draws)</span><span><span class="sw c-terra-b"></span>comparison scenario</span><span>shaded: scenario sensitivity range</span>
       </div>
-      <div class="charts"><div id="c-terra"></div><div id="c-wbc"></div><div id="c-rate"></div><div id="c-dose"></div><div id="c-strip"></div></div>
+      <div class="charts"><div id="c-terra"></div><div id="c-wbc"></div><div id="c-rate"></div><div id="c-dose"></div></div>
       <p class="sub" style="margin-top:6px"><b>For astronauts:</b> dashed lines are simulated projections for a synthetic astronaut, not measurements of you. Diamonds are lab results, shown once the lab has reported them. 0% on TERRA means the same as baseline. Alerts always reach your watch first.</p>
-      <p class="sub" style="margin-top:6px">Drag to pan · Shift-drag or “Select” to choose an interval · Ctrl/⌘-scroll to zoom · click a chart to move the mission clock · click a marker for its explanation.</p>
+      <p class="sub" style="margin-top:6px">Drag to pan · Shift-drag or “Select” to choose an interval · Ctrl/⌘-scroll to zoom · click a chart to move the mission clock · events and their explanations: “What happened &amp; why”.</p>
     </div><aside class="side" id="tl-side"></aside></div>`;
 
   const m0 = store.model;
@@ -59,7 +59,6 @@ export function mountTimeline(host, store, ctx) {
     wbc: group.add(new TimeChart($('#c-wbc', host), { height: 150, title: 'White blood cells · immune cells (lab blood test)', unit: '×10⁹/L', note: 'shaded band = normal lab range' })),
     rate: group.add(new TimeChart($('#c-rate', host), { height: 110, title: 'Radiation dose rate r(t) · how fast exposure is adding up', unit: 'mSv/day (dose-equivalent reference)', zeroBased: true, yFormat: v => fmt(v, 2) })),
     dose: group.add(new TimeChart($('#c-dose', host), { height: 120, title: 'Mission dose total D(t) · running exposure', unit: 'mSv · plateaus after landing, never falls', zeroBased: true, yFormat: v => fmt(v, 0) })),
-    strip: group.add(new TimeChart($('#c-strip', host), { height: 132, title: 'Mission phase · where the spacecraft is · events', unit: '', kind: 'strip' })),
   };
 
   function terraLayers(m, cmp) {
@@ -108,27 +107,6 @@ export function mountTimeline(host, store, ctx) {
     return { t0: start, dt, values };
   }
 
-  function stripLayers(m) {
-    const S = m.schedule;
-    const rows = { phase: [12, 34], region: [36, 58], traj: [62, 80], samples: [82, 98], alerts: [100, 118] };
-    charts.strip.rowLabels = [{ label: 'Phase', y0: 12, y1: 34 }, { label: 'Region', y0: 36, y1: 58 }, { label: 'Trajectory', y0: 62, y1: 80 }, { label: 'Samples', y0: 82, y1: 98 }, { label: 'Alerts', y0: 100, y1: 118 }];
-    const rc = S.regionChanges;
-    const regionSpans = rc.map((c, i) => ({ start: Math.max(S.start, c.t), end: i + 1 < rc.length ? rc[i + 1].t : S.end, cls: 'seg-' + c.region, label: REGION_LABEL[c.region], short: REGION_LABEL[c.region] }));
-    const ev = m.events;
-    const traj = ev.filter(e => ['launch', 'magnetosphere_exit', 'magnetosphere_reentry', 'belt_transit', 'landing', 'spe', 'preflight_stress', 'baseline_window', 'comm_outage'].includes(e.event_type));
-    return [
-      { type: 'spans', row: rows.phase, labels: true, spans: S.phases.map(p => ({ start: p.start, end: p.end, cls: 'seg-' + p.phase, label: PHASE_LABEL[p.phase] })) },
-      { type: 'spans', row: rows.region, labels: true, spans: regionSpans },
-      { type: 'markers', row: rows.traj, ranges: true, markers: traj.map(e => ({ id: e.id, t: e.t, t_end: e.t_end, label: `${e.label} · ${e.mission_label}`, cls: e.event_type === 'comm_outage' ? 'outage' : '', glyph: { launch: '▲', landing: '▼', magnetosphere_exit: '◇', magnetosphere_reentry: '◆', spe: '☀' }[e.event_type] })) },
-      { type: 'markers', row: rows.samples, markers: ev.filter(e => e.event_type === 'sample').map(e => ({ id: e.id, t: e.t, label: `${e.label} · ${e.note}`, glyph: '•' })) },
-      { type: 'markers', row: rows.alerts, markers: m.alerts.episodes.filter(e => e.category !== 'schedule').map(e => {
-        const sev = e.severity_history[e.severity_history.length - 1].severity;
-        return { id: 'ep:' + e.episode_id, t: e.start, label: `${e.rule_id} · ${SEVERITY_LABEL[sev]} · ${missionLabel(S, e.start, true)}`, cls: 'sev-' + sev };
-      }) },
-      { type: 'markers', row: [0, 118], markers: ev.filter(e => e.event_type === 'peak').map(e => ({ id: e.id, t: e.t, label: e.label })), hidden: false },
-    ];
-  }
-
   function renderCharts() {
     const m = store.model;
     const cmp = ui.compare ? store.compareModel : null;
@@ -145,7 +123,6 @@ export function mountTimeline(host, store, ctx) {
       cmp && { type: 'line', grid: doseGrid(cmp), cls: 'c-dose-b', tipLabel: 'Comparison', tipFormat: v => fmt(v, 1) },
       planning && { type: 'hline', v: planning, label: `demo planning level ${planning} mSv dose equivalent — not the NASA 600 mSv effective-dose limit` },
     ].filter(Boolean);
-    charts.strip.layers = stripLayers(m);
     group.cursor = store.t;
     group.renderAll();
   }
@@ -246,7 +223,7 @@ export function mountTimeline(host, store, ctx) {
         <div class="row" style="margin-top:8px"><button class="btn small" data-act="export-sel">Export CSV + JSON</button><button class="btn small" data-act="report-sel">Annotated report</button></div></section>`);
     }
     if (ctx.audience === 'crew') {
-      parts.push(`<section class="panel"><h2>How to read these charts</h2><p class="sub">Dashed lines are <b>simulated projections</b> for the synthetic astronaut, not measurements. Diamonds are lab results, shown once the lab has reported them. TERRA at 0% means the same as your baseline. The shaded band shows how the projection changes when assumptions change. It is not a forecast of your health. Click any marker in the bottom strip for a plain-language explanation.</p></section>`);
+      parts.push(`<section class="panel"><h2>How to read these charts</h2><p class="sub">Dashed lines are <b>simulated projections</b> for the synthetic astronaut, not measurements. Diamonds are lab results, shown once the lab has reported them. TERRA at 0% means the same as your baseline. The shaded band shows how the projection changes when assumptions change. It is not a forecast of your health. Plain-language explanations of each event are under “What happened &amp; why”.</p></section>`);
       $('#tl-side', host).innerHTML = parts.join('');
       return;
     }
