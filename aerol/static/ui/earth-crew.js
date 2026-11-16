@@ -1,7 +1,7 @@
 // Dashboard · crew-member view. Runs onboard (no link delay for the crew's own data),
 // in plain language. Physicians use the other audience view; both read the same store.
 import { DAY, isNum, fmt, signed, sampleGrid } from '../core/util.js';
-import { missionLabel, PHASE_LABEL, REGION_LABEL } from '../core/schedule.js';
+import { missionLabel, friendlyCode, PHASE_LABEL, REGION_LABEL } from '../core/schedule.js';
 import { rateAt, doseAt } from '../core/radiation.js';
 import { episodeStatus, SEVERITY_LABEL } from '../core/rules.js';
 import { followups, deliveryTime } from '../core/store.js';
@@ -29,12 +29,12 @@ export function crewHome(store) {
     <section class="panel"><h2>Status</h2>${status}</section>
     <section class="panel"><h2>Recovery</h2><div class="stat"><div class="v">${isNum(w.day?.recovery) && !w.vitals.missing ? w.day.recovery : '—'}<small>/100</small></div><div class="n">Demo estimate from HRV, resting heart rate and sleep. It never overrides an alert.</div></div></section>
     <section class="panel"><h2>Radiation exposure</h2><div class="stat"><div class="v">${fmt(rateAt(m.segments, t), 2)}<small> mSv/day</small></div><div class="n">${esc(REGION_LABEL[w.region])} · last 7 days ${fmt(w.dose7, 1)} mSv · mission ${fmt(w.dose, 1)} mSv (simulated dosimeter)</div></div></section>
-    <section class="panel"><h2>Next blood draw</h2><div class="stat"><div class="v">${nextDraw ? esc(nextDraw.label) : '—'}</div><div class="n">${nextDraw ? `${esc(missionLabel(m.schedule, nextDraw.t, true))} · ${esc(nextDraw.purpose)}` : 'None scheduled'}</div></div></section>
+    <section class="panel"><h2>Next blood draw</h2><div class="stat"><div class="v">${nextDraw ? esc(friendlyCode(nextDraw.label)) : '—'}</div><div class="n">${nextDraw ? `${esc(missionLabel(m.schedule, nextDraw.t, true))} · ${esc(nextDraw.purpose)}` : 'None scheduled'}</div></div></section>
   </div>
   <div class="qgrid">
     <section class="panel"><h2>My lab results</h2><p class="sub">Blood tests are run by a lab, never by the watch. In-flight TERRA samples are measured on Earth after you return.</p>
-      <dl class="kv" style="margin-top:8px"><dt>White blood cells</dt><dd>${wbc ? `${fmt(wbc.value, 1)} ×10⁹/L at ${esc(wbc.label)} — ${signed(wbc.pct_from_baseline, 0, '%')} vs your baseline; lab range ${m.scenario.wbc.lab_range.join('–')}` : 'No result yet'}</dd>
-      <dt>TERRA (research marker)</dt><dd>${terra ? `${fmt(terra.fold, 2)}× your baseline at ${esc(terra.label)}` : 'No result available yet'} <span class="chip pred">not a diagnosis</span></dd>
+      <dl class="kv" style="margin-top:8px"><dt>White blood cells</dt><dd>${wbc ? `${fmt(wbc.value, 1)} ×10⁹/L at ${esc(friendlyCode(wbc.label))} — ${signed(wbc.pct_from_baseline, 0, '%')} vs your baseline; lab range ${m.scenario.wbc.lab_range.join('–')}` : 'No result yet'}</dd>
+      <dt>TERRA (research marker)</dt><dd>${terra ? `${fmt(terra.fold, 2)}× your baseline at ${esc(friendlyCode(terra.label))}` : 'No result available yet'} <span class="chip pred">not a diagnosis</span></dd>
       <dt>TERRA projection now</dt><dd>${signed(100 * (proj - 1), 0, '%')} vs baseline <span class="chip sim">simulated projection</span></dd></dl>
       <p class="sub">All values here are from the simulation (synthetic astronaut ${esc(m.scenario.astronaut_id)}).</p></section>
     <section class="panel"><h2>Messages from Earth</h2>${msgs.length ? msgs.map(x => `<div class="msg"><b>${esc(x.title)}</b><p>${esc(x.text)}</p><span class="sub">delivered ${esc(missionLabel(m.schedule, x.t, true))}</span></div>`).join('') : '<p class="sub">No messages yet. Physician replies arrive on the next uplink (simulated).</p>'}</section>

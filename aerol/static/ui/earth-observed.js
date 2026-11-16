@@ -1,6 +1,6 @@
 // Dashboard · Observed research mode. Source data keep their own units, timing and cohorts.
 import { DAY, isNum, fmt, iso } from '../core/util.js';
-import { PHASE_LABEL } from '../core/schedule.js';
+import { PHASE_LABEL, friendlyCode } from '../core/schedule.js';
 import { twinsTerra, twinsPhases, dostelSegments, dostelCumulative, i4Wbc, correlationsTable, missionTimes } from '../core/research.js';
 import { ChartGroup, TimeChart } from './charts.js';
 import { $, esc } from './dom.js';
@@ -22,7 +22,7 @@ export function mountObserved(host, research) {
   function renderTwins() {
     const tw = research.missions.twins;
     const { launch, landing } = missionTimes(tw);
-    const label = t => (t < launch ? `L−${Math.ceil((launch - t) / DAY)}` : t < landing ? `FD${Math.floor((t - launch) / DAY)}` : `R+${Math.floor((t - landing) / DAY)}`);
+    const label = t => friendlyCode(t < launch ? `L-${Math.ceil((launch - t) / DAY)}` : t < landing ? `FD${Math.floor((t - launch) / DAY)}` : `R+${Math.floor((t - landing) / DAY)}`);
     $('#ob-body', host).innerHTML = `<div class="notice" style="margin:8px 0">Observed data, one astronaut (TW). TERRA is in raw normalized-abundance units: no pre-flight personal baseline exists in the bundle, so no fold change is computed. Station dosimetry is an <b>area monitor</b> (absorbed dose, µGy/h) — not a personal dosimeter and not dose equivalent. Sparse samples are shown as points only, never interpolated.</div>
       <div class="charts"><div id="o-terra"></div><div id="o-rate"></div><div id="o-dose"></div><div id="o-strip"></div></div>
       <section class="panel" style="margin-top:10px"><h2>Exploratory association: station radiation vs TERRA (matched windows only)</h2><p class="sub">${esc(research.correlation_note)} Mean station dose rate over the window preceding each in-flight sample; FD334 excluded (&lt;80% coverage).</p>
@@ -38,7 +38,7 @@ export function mountObserved(host, research) {
     const cum = dostelCumulative(research, ui.detector);
     const dose = group.add(new TimeChart($('#o-dose', host), { height: 110, title: 'Station radiation total (area monitor, covered hours only)', unit: 'mGy — not personal, not mSv', zeroBased: true, yFormat: v => fmt(v, 0), note: `${fmt(cum.missingHours, 0)} uncovered hours are not filled` }));
     const strip = group.add(new TimeChart($('#o-strip', host), { height: 70, title: 'Phases (thirds of flight) · solar proton events (GOES, not ISS dose)', kind: 'strip' }));
-    terra.setLayers([{ type: 'points', cls: 'c-obs', points: twinsTerra(research).map(p => ({ t: p.t, v: p.v, tip: `<b>${esc(p.label)}</b> · ${esc(p.rec.time_window_start.slice(0, 10))}<br>${fmt(p.v, 3)} ×10⁻³ normalized abundance<br>${esc(PHASE_LABEL[p.rec.mission_phase])}<div class="tipmeta">Observed · ${esc(p.rec.source_reference)} · ${esc(p.rec.quality_flag)}</div>` })) }]);
+    terra.setLayers([{ type: 'points', cls: 'c-obs', points: twinsTerra(research).map(p => ({ t: p.t, v: p.v, tip: `<b>${esc(friendlyCode(p.label))}</b> · ${esc(p.rec.time_window_start.slice(0, 10))}<br>${fmt(p.v, 3)} ×10⁻³ normalized abundance<br>${esc(PHASE_LABEL[p.rec.mission_phase])}<div class="tipmeta">Observed · ${esc(p.rec.source_reference)} · ${esc(p.rec.quality_flag)}</div>` })) }]);
     rate.setLayers([{ type: 'step', segments: dostelSegments(research, ui.detector).map(s => ({ ...s, v: s.eligible ? s.v : null })).filter(s => isNum(s.v)), cls: 'c-rate', tipLabel: 'Daily mean', tipUnit: 'µGy/h' }]);
     dose.setLayers([{ type: 'line', points: cum.points, cls: 'c-dose' }]);
     const sep = research.records.filter(r => r.event_type === 'solar_particle_event');
@@ -53,7 +53,7 @@ export function mountObserved(host, research) {
   function renderI4() {
     const m = research.missions.inspiration4;
     const { launch, landing } = missionTimes(m);
-    const label = t => (t < launch ? `L−${Math.round((launch - t) / DAY)}` : t < landing ? 'flight' : `R+${Math.round((t - landing) / DAY)}`);
+    const label = t => (t < launch ? friendlyCode(`L-${Math.round((launch - t) / DAY)}`) : t < landing ? 'In flight' : friendlyCode(`R+${Math.round((t - landing) / DAY)}`));
     const pts = i4Wbc(research);
     const subj = ['C001', 'C002', 'C003', 'C004'];
     $('#ob-body', host).innerHTML = `<div class="notice" style="margin:8px 0">Observed CBC for four Inspiration4 crew (3-day flight). Each subject is shown separately; no in-flight samples exist; R+1 is the closest sample to landing. These are different people from the Twins Study and are not paired with it.</div>
@@ -66,7 +66,7 @@ export function mountObserved(host, research) {
       const layers = [{ type: 'hband', lo, hi, label: 'Lab reference range' }];
       subj.forEach((s, i) => layers.push({ type: 'points', cls: 's' + (i + 1), points: pts.filter(p => p.subject === s).map(p => {
         const v = key ? p.rec.differential_absolute?.[key] : p.v;
-        return { t: p.t, v, tip: `<b>${s} · ${esc(p.label)}</b><br>${fmt(v, 2)} ×10⁹/L${key ? '' : ` (${p.rec.percent_change_from_baseline >= 0 ? '+' : ''}${fmt(p.rec.percent_change_from_baseline, 0)}% vs L-92)`}<div class="tipmeta">Observed · OSD-569 · ${esc(PHASE_LABEL[p.rec.mission_phase])} · clock time unknown</div>` };
+        return { t: p.t, v, tip: `<b>${s} · ${esc(friendlyCode(p.label))}</b><br>${fmt(v, 2)} ×10⁹/L${key ? '' : ` (${p.rec.percent_change_from_baseline >= 0 ? '+' : ''}${fmt(p.rec.percent_change_from_baseline, 0)}% vs sample 92 days before launch)`}<div class="tipmeta">Observed · OSD-569 · ${esc(PHASE_LABEL[p.rec.mission_phase])} · clock time unknown</div>` };
       }) }));
       c.setLayers(layers);
     };

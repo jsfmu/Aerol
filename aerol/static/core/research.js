@@ -1,7 +1,7 @@
 // Observed-research adapters. Preserves source units, timing windows and cohort labels.
 import { DAY, HOUR, isNum, sampleGrid, fmt, signed, median } from './util.js';
 import { RADIATION_SCHEMA, emptyRadiation } from './schema.js';
-import { PHASES, PHASE_LABEL } from './schedule.js';
+import { PHASES, PHASE_LABEL, friendlyCode } from './schedule.js';
 
 export function missionTimes(m) {
   return { launch: Date.parse(m.launch_utc), landing: Date.parse(m.landing_utc) };
@@ -94,7 +94,7 @@ export function phaseComparison(research, model) {
   rows.push({
     id: 'twins-terra', dataset: 'TERRA · NASA Twins Study', cohort: 'Flight subject TW, n = 1', origin: 'observed', unit: 'normalized abundance ×10⁻³ (raw)',
     note: 'No pre-flight personal baseline exists in the bundled data, so no fold change is computed.',
-    cells: Object.fromEntries(PHASES.map(p => [p, terra.filter(x => x.rec.mission_phase === p).map(x => `${x.label}: ${fmt(x.v, 2)}`)])),
+    cells: Object.fromEntries(PHASES.map(p => [p, terra.filter(x => x.rec.mission_phase === p).map(x => `${friendlyCode(x.label)}: ${fmt(x.v, 2)}`)])),
     empty: { preflight: 'No flight-subject pre-flight sample in bundle', landing: 'No landing-day sample' },
   });
   // Inspiration4 CBC (observed, absolute)
@@ -104,22 +104,22 @@ export function phaseComparison(research, model) {
   const i4cells = Object.fromEntries(PHASES.map(p => [p, []]));
   for (const [label, xs] of Object.entries(byLabel)) {
     const vals = xs.map(x => x.v);
-    i4cells[xs[0].rec.mission_phase].push(`${label}: median ${fmt(median(vals), 1)} (${fmt(Math.min(...vals), 1)}–${fmt(Math.max(...vals), 1)}), n=${vals.length}`);
+    i4cells[xs[0].rec.mission_phase].push(`${friendlyCode(label)}: median ${fmt(median(vals), 1)} (${fmt(Math.min(...vals), 1)}–${fmt(Math.max(...vals), 1)}), n=${vals.length}`);
   }
   for (const p of PHASES) i4cells[p].sort((a, b) => order(a) - order(b));
   rows.push({ id: 'i4-wbc', dataset: 'WBC · Inspiration4 (OSD-569)', cohort: '4 crew, 3-day flight at ~585 km', origin: 'observed', unit: '10⁹/L',
-    note: 'No in-flight samples. R+1 is the closest sample to landing (not R+0).', cells: i4cells,
+    note: 'No in-flight samples. 1 day after landing is the closest sample to landing.', cells: i4cells,
     empty: { early_flight: 'No in-flight sample', mid_flight: 'No in-flight sample', late_flight: 'No in-flight sample' } });
   // Crucian (cohort, qualitative)
-  rows.push({ id: 'crucian', dataset: 'WBC · ISS immune study (Crucian 2015)', cohort: '23 ISS crew (cohort means)', origin: 'published finding (qualitative)', unit: 'vs L-180',
+  rows.push({ id: 'crucian', dataset: 'WBC · ISS immune study (Crucian 2015)', cohort: '23 ISS crew (cohort means)', origin: 'published finding (qualitative)', unit: 'vs 6-month pre-flight baseline',
     note: 'Values exist only in figures; no absolute counts imported.',
-    cells: { preflight: ['L-180 (baseline), L-45'], early_flight: ['~FD14: WBC & granulocytes ↑ (significant)'], mid_flight: ['Months 2–4: elevated, not significant'],
-      late_flight: ['~6 months: WBC ↑ (significant)'], landing: ['R+0 (~3 h after landing): WBC surge'], after_return: ['R+30'] }, empty: {} });
+    cells: { preflight: ['6 months before launch (baseline), 45 days before launch'], early_flight: ['About flight day 14: WBC & granulocytes ↑ (significant)'], mid_flight: ['Months 2–4: elevated, not significant'],
+      late_flight: ['~6 months: WBC ↑ (significant)'], landing: ['~3 h after landing: WBC surge'], after_return: ['30 days after landing'] }, empty: {} });
   // Report digitized ISS WBC (relative)
   const dig = research.records.filter(r => r.study_id === 'combined_radiation_report');
   rows.push({ id: 'report-iss', dataset: 'WBC · combined report “ISS (original)”', cohort: 'Aggregate; upstream source not stated', origin: 'digitized_reference (±5 pp)', unit: '% vs report baseline',
     note: 'Read by eye from a chart in the team PDF; baseline definition not stated.',
-    cells: Object.fromEntries(PHASES.map(p => [p, dig.filter(r => r.mission_phase === p).map(r => `${signed(r.relative_change_percent, 0, '%')} (${r.mission_day !== null ? 'FD~' + r.mission_day : 'R+' + r.return_day})`)])), empty: {} });
+    cells: Object.fromEntries(PHASES.map(p => [p, dig.filter(r => r.mission_phase === p).map(r => `${signed(r.relative_change_percent, 0, '%')} (${friendlyCode(r.mission_day !== null ? 'FD~' + r.mission_day : 'R+' + r.return_day)})`)])), empty: {} });
   const rp = research.report_projection;
   rows.push({ id: 'report-proj', dataset: 'TERRA / WBC · combined report deep-space projection', cohort: 'Illustrative model output', origin: 'digitized_reference of a projection', unit: '% change',
     note: rp.note,
@@ -128,10 +128,10 @@ export function phaseComparison(research, model) {
   if (model) {
     const cells = Object.fromEntries(PHASES.map(p => [p, []]));
     for (const l of model.labs) {
-      const txt = l.kind === 'terra' ? `${l.label} TERRA ${fmt(l.fold, 2)}× (${signed(l.pct, 0, '%')})` : `${l.label} WBC ${fmt(l.value, 1)}`;
+      const txt = l.kind === 'terra' ? `${friendlyCode(l.label)}: TERRA ${fmt(l.fold, 2)}× (${signed(l.pct, 0, '%')})` : `${friendlyCode(l.label)}: WBC ${fmt(l.value, 1)}`;
       cells[l.phase].push(txt);
     }
-    rows.push({ id: 'sim', dataset: 'Simulation · ' + model.scenario.name, cohort: `Synthetic astronaut ${model.scenario.astronaut_id}`, origin: 'simulation', unit: 'fold vs L-180 / 10⁹/L',
+    rows.push({ id: 'sim', dataset: 'Simulation · ' + model.scenario.name, cohort: `Synthetic astronaut ${model.scenario.astronaut_id}`, origin: 'simulation', unit: 'fold vs 6-month baseline / 10⁹/L',
       note: 'Simulated lab draws from the hand-set simulator — not data.', cells, empty: { landing: 'R+0 has WBC only (no TERRA sample planned)' } });
   }
   return rows;

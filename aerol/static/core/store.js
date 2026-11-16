@@ -1,7 +1,7 @@
 // One shared store + simulation clock. The watch and the dashboard both read from here,
 // so they cannot disagree; the ground view is explicitly delayed via simulated packets.
 import { DAY, HOUR, MINUTE, isNum, iso, fmt, signed, sampleGrid, round } from './util.js';
-import { buildSchedule, scenarioFromPreset, regionAt, phaseAt, missionLabel, validateScenario, REGION_LABEL, PHASE_LABEL } from './schedule.js';
+import { buildSchedule, scenarioFromPreset, regionAt, phaseAt, missionLabel, friendlyCode, validateScenario, REGION_LABEL, PHASE_LABEL } from './schedule.js';
 import { buildSegments, rateAt, doseAt, simulateDosimeter, ingestReadings } from './radiation.js';
 import { simulateTerra, simulateWbc, terraEnvelope, wbcEnvelope, simulateLabSamples, MODEL_REGISTRY } from './models.js';
 import { simulateVitals, vitalsBaseline, dailySummaries, latestVitals } from './vitals.js';
@@ -123,7 +123,7 @@ export function followups(model, actions, t) {
   }
   for (const s of schedule.samples) {
     if (s.t < t - DAY) continue;
-    items.push({ id: `fu-sample-${s.label}`, kind: 'sample', title: `Blood draw ${s.label}`, urgency: 'scheduled', severity: 'info', t: s.t, status: s.t <= t ? 'due now' : 'upcoming', messages: [] });
+    items.push({ id: `fu-sample-${s.label}`, kind: 'sample', title: `Blood draw · ${friendlyCode(s.label)}`, urgency: 'scheduled', severity: 'info', t: s.t, status: s.t <= t ? 'due now' : 'upcoming', messages: [] });
   }
   for (const a of actions.filter(a => a.action === 'request_sample' && a.side === 'ground')) {
     const delivered = deliveryTime(model, a.t, 'up');
@@ -166,8 +166,8 @@ export function checkupBrief(model, actions, t) {
     ...(unresolved.length ? unresolved.map(x => `- ${missionLabel(schedule, x.e.start, true)} ${x.e.rule_id}: ${x.s.severity}, ${x.s.status}`) : ['- None.']),
     '',
     'LABORATORY RESULTS AVAILABLE (simulated lab results)',
-    lastW ? `- WBC ${fmt(lastW.value, 1)} ×10⁹/L at ${lastW.label} (${signed(lastW.pct_from_baseline, 0, '%')} vs L-180; lab range ${model.scenario.wbc.lab_range.join('–')}).` : '- No WBC result yet.',
-    lastT ? `- TERRA ${fmt(lastT.fold, 2)}× baseline at ${lastT.label} (assay result).` : '- No TERRA assay result available yet (in-flight samples are assayed on Earth after return).',
+    lastW ? `- WBC ${fmt(lastW.value, 1)} ×10⁹/L on ${friendlyCode(lastW.label)} (${signed(lastW.pct_from_baseline, 0, '%')} vs 6-month pre-flight baseline; lab range ${model.scenario.wbc.lab_range.join('–')}).` : '- No WBC result yet.',
+    lastT ? `- TERRA ${fmt(lastT.fold, 2)}× baseline on ${friendlyCode(lastT.label)} (assay result).` : '- No TERRA assay result available yet (in-flight samples are assayed on Earth after return).',
     '',
     'RESEARCH PREDICTIONS — UNCONFIRMED, NOT FOR CLINICAL DECISIONS',
     `- Simulated TERRA projection now: ${signed(100 * (proj - 1), 0, '%')} vs baseline (hand-set simulator, not validated).`,

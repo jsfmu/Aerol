@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import { DAY, HOUR, sampleGrid } from '../../aerol/static/core/util.js';
-import { buildSchedule, scenarioFromPreset, phaseAt, regionAt, missionLabel, PHASES, validateScenario } from '../../aerol/static/core/schedule.js';
+import { buildSchedule, scenarioFromPreset, phaseAt, regionAt, missionLabel, friendlyCode, PHASES, validateScenario } from '../../aerol/static/core/schedule.js';
 import { buildSegments, rateAt, doseAt, workedChecks, ingestReadings, simulateDosimeter, rateSteps } from '../../aerol/static/core/radiation.js';
 import { modelContext, MODEL_REGISTRY } from '../../aerol/static/core/models.js';
 import { rmssd } from '../../aerol/static/core/vitals.js';
@@ -30,10 +30,15 @@ test('six canonical phases and independent exposure regions', () => {
   assert.equal(phaseAt(S, ret(10)), 'after_return');
   // re-entry is separate from landing
   assert.ok(S.reentry < S.landing - DAY);
-  assert.equal(missionLabel(S, at(-12)), 'L−12');
-  assert.equal(missionLabel(S, at(45.2)), 'FD45');
-  assert.equal(missionLabel(S, ret(30.5)), 'R+30');
-  assert.equal(missionLabel(S, ret(0.125)), 'R+0 (3 h)');
+  assert.equal(missionLabel(S, at(-12)), '12 days before launch');
+  assert.equal(missionLabel(S, at(45.2)), 'Flight day 45');
+  assert.equal(missionLabel(S, ret(30.5)), '30 days after landing');
+  assert.equal(missionLabel(S, ret(0.125)), 'Landing day (3 h after)');
+  assert.equal(friendlyCode('L-180'), '180 days before launch');
+  assert.equal(friendlyCode('FD14'), 'Flight day 14');
+  assert.equal(friendlyCode('R+30'), '30 days after landing');
+  assert.equal(friendlyCode('R+0.125'), 'Landing day');
+  assert.equal(friendlyCode('FD~90'), 'About flight day 90');
   assert.deepEqual(validateScenario(sc), []);
   assert.ok(validateScenario({ ...sc, exit_day: 160, reentry_day: 150 }).length > 0);
 });

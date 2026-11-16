@@ -1,7 +1,7 @@
 // Dashboard with two audiences: crew members (onboard, plain language, their own data)
 // and Earth physicians/researchers (delayed ground view, review tools). Same store, same clock.
 import { DAY, isNum, fmt, iso, signed } from '../core/util.js';
-import { missionLabel, PHASES, PHASE_LABEL, REGION_LABEL, validateScenario } from '../core/schedule.js';
+import { missionLabel, friendlyCode, PHASES, PHASE_LABEL, REGION_LABEL, validateScenario } from '../core/schedule.js';
 import { workedChecks, QUANTITIES } from '../core/radiation.js';
 import { episodeStatus, SEVERITY_LABEL, RULESET_VERSION, defaultRules } from '../core/rules.js';
 import { packetStatus, checkupBrief, actionSummary } from '../core/store.js';
@@ -165,7 +165,7 @@ export function mountEarth(root, store, { research, navigate }) {
         ${m.schedule.regionChanges.filter(c => isNum(c.t)).map(c => `<tr><td>${esc(c.label)} → ${esc(REGION_LABEL[c.region])}</td><td>${esc(iso(c.t))}</td><td>${esc(missionLabel(m.schedule, c.t, true))}</td></tr>`).join('')}
         ${m.schedule.phases.map(p => `<tr><td>Phase: ${esc(PHASE_LABEL[p.phase])}</td><td>${esc(iso(p.start).slice(0, 16))} → ${esc(iso(p.end).slice(0, 16))}</td><td>${esc(missionLabel(m.schedule, p.start))} → ${esc(missionLabel(m.schedule, p.end))}</td></tr>`).join('')}
         <tr><td>Baseline window</td><td>${esc(iso(m.schedule.baselineWindow[0]).slice(0, 10))} → ${esc(iso(m.schedule.baselineWindow[1]).slice(0, 10))}</td><td>before modeled stress onset ${esc(missionLabel(m.schedule, m.schedule.stressOnset))}</td></tr>
-        ${m.labs.map(l => `<tr><td>${esc(l.kind.toUpperCase())} sample ${esc(l.label)} — result available</td><td>${esc(iso(l.t).slice(0, 16))} → ${esc(iso(l.available).slice(0, 16))}</td><td>${esc(missionLabel(m.schedule, l.available, true))}</td></tr>`).join('')}
+        ${m.labs.map(l => `<tr><td>${esc(l.kind.toUpperCase())} sample ${esc(friendlyCode(l.label))} — result available</td><td>${esc(iso(l.t).slice(0, 16))} → ${esc(iso(l.available).slice(0, 16))}</td><td>${esc(missionLabel(m.schedule, l.available, true))}</td></tr>`).join('')}
       </tbody></table></section>`;
   }
 

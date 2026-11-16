@@ -1,6 +1,6 @@
 // Mission events (aerol.event.v1), plain-language explanations, and peak/dip detection.
 import { DAY, HOUR, iso, isNum, sampleGrid, round, fmt, signed } from './util.js';
-import { phaseAt, regionAt, missionLabel, REGION_LABEL, PHASE_LABEL } from './schedule.js';
+import { phaseAt, regionAt, missionLabel, friendlyCode, REGION_LABEL, PHASE_LABEL } from './schedule.js';
 import { rateAt, doseAt } from './radiation.js';
 import { emptyEvent } from './schema.js';
 
@@ -110,7 +110,7 @@ const EXPLAIN = {
     what: 'Personal-baseline window: samples here define each metric’s 1.0× / 0% reference.',
     term: 'Baseline — the astronaut’s own typical value, measured before pre-mission stress is assumed to begin.',
     contributors: ['Normal day-to-day variation'],
-    evidence: 'The ISS immune study used L-180 as its baseline because samples closer to launch may be influenced by pre-mission stress (Crucian et al. 2015).',
+    evidence: 'The ISS immune study used a sample 6 months before launch as its baseline because samples closer to launch may be influenced by pre-mission stress (Crucian et al. 2015).',
     uncertainty: 'One baseline sample per metric is noisy; repeated baseline draws would be better.',
     action: 'None — reference only.', status: 'supported',
   }),
@@ -179,7 +179,7 @@ const EXPLAIN = {
     action: 'Scheduled recovery follow-ups (R+30, R+90, R+180).', status: 'simulated',
   }),
   sample: (m, e) => ({
-    what: `Scheduled blood draw ${e.label}: ${e.purpose}.`,
+    what: `Scheduled blood draw (${e.label.replace('Blood draw · ', '')}): ${e.purpose}.`,
     term: 'TERRA and WBC are laboratory assays from blood — the watch does not measure them.',
     contributors: [],
     evidence: e.note || 'Protocol schedule.',
@@ -236,7 +236,7 @@ export function buildEvents(model) {
   for (const s of schedule.samples) {
     const labs = model.labs.filter(l => l.label === s.label);
     const avail = labs.map(l => `${l.kind.toUpperCase()} result ${missionLabel(schedule, l.available)}`).join(' · ');
-    add({ id: `sample-${s.label}`, t: s.t, event_type: 'sample', label: `Blood draw ${s.label}`, purpose: s.purpose, lane: 'samples',
+    add({ id: `sample-${s.label}`, t: s.t, event_type: 'sample', label: `Blood draw · ${friendlyCode(s.label)}`, purpose: s.purpose, lane: 'samples',
       note: `Specimens: ${s.specimens.join(', ').toUpperCase()}. ${avail}.` });
   }
   const tEx = curveExtrema(model.terra.fold, { from: schedule.launch - 60 * DAY, to: schedule.end, prominence: EXTREMA_RULE.prominence.terra });

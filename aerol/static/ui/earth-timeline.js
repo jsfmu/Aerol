@@ -1,6 +1,6 @@
 // Dashboard · synchronized simulation timeline (TERRA, WBC, dose rate, cumulative dose, events).
 import { DAY, HOUR, isNum, fmt, signed, sampleGrid, iso } from '../core/util.js';
-import { missionLabel, phaseAt, regionAt, PHASE_LABEL, REGION_LABEL } from '../core/schedule.js';
+import { missionLabel, friendlyCode, phaseAt, regionAt, PHASE_LABEL, REGION_LABEL } from '../core/schedule.js';
 import { doseAt, rateAt, rateSteps } from '../core/radiation.js';
 import { lagInspector, explainEvent } from '../core/events.js';
 import { SEVERITY_LABEL } from '../core/rules.js';
@@ -68,7 +68,7 @@ export function mountTimeline(host, store, ctx) {
     const t = store.t;
     const pts = m.labs.filter(l => l.kind === 'terra' && l.available <= t).map(l => ({
       t: l.t, v: l.available <= t ? toY(l.fold) : toY(l.projected), shape: 'diamond', filled: l.available <= t, cls: l.available <= t ? '' : 'pending',
-      tip: `<b>Simulated lab sample ${esc(l.label)}</b><br>${l.available <= t ? `TERRA ${fmt(l.fold, 2)}× (${signed(l.pct, 0, '%')}) vs L-180` : `Result pending until ${esc(missionLabel(m.schedule, l.available, true))} (plotted at projection)`}<br>${esc(PHASE_LABEL[l.phase])} · ${esc(REGION_LABEL[l.region])}<div class="tipmeta">Origin: simulation · raw ${l.raw.toExponential(3)} normalized abundance (synthetic) · ${l.inFlight ? 'in-flight sample assayed on Earth after return' : 'ground sample'}</div>`,
+      tip: `<b>Simulated lab sample · ${esc(friendlyCode(l.label))}</b><br>${l.available <= t ? `TERRA ${fmt(l.fold, 2)}× (${signed(l.pct, 0, '%')}) vs 6-month pre-flight baseline` : `Result pending until ${esc(missionLabel(m.schedule, l.available, true))} (plotted at projection)`}<br>${esc(PHASE_LABEL[l.phase])} · ${esc(REGION_LABEL[l.region])}<div class="tipmeta">Origin: simulation · raw ${l.raw.toExponential(3)} normalized abundance (synthetic) · ${l.inFlight ? 'in-flight sample assayed on Earth after return' : 'ground sample'}</div>`,
     }));
     return [
       { type: 'band', lo: mapGrid(m.terraEnv.lo, toY), hi: mapGrid(m.terraEnv.hi, toY), cls: 'c-terra', label: m.terraEnv.label, tipLabel: 'Sensitivity range', hidden: !ui.band },
@@ -84,7 +84,7 @@ export function mountTimeline(host, store, ctx) {
     const [lo, hi] = m.scenario.wbc.lab_range;
     const pts = m.labs.filter(l => l.kind === 'wbc' && l.available <= t).map(l => ({
       t: l.t, v: l.available <= t ? l.value : l.projected, shape: 'diamond', filled: l.available <= t, cls: l.available <= t ? '' : 'pending',
-      tip: `<b>Simulated lab sample ${esc(l.label)}</b><br>${l.available <= t ? `WBC ${fmt(l.value, 2)} ×10⁹/L (${signed(l.pct_from_baseline, 0, '%')} vs L-180)<br>Neutrophils ${fmt(l.diff.neutrophils, 2)} · Lymphocytes ${fmt(l.diff.lymphocytes, 2)}` : `Result pending until ${esc(missionLabel(m.schedule, l.available, true))}`}<div class="tipmeta">Origin: simulation · ${esc(l.method)} · lab range ${lo}–${hi}</div>`,
+      tip: `<b>Simulated lab sample · ${esc(friendlyCode(l.label))}</b><br>${l.available <= t ? `WBC ${fmt(l.value, 2)} ×10⁹/L (${signed(l.pct_from_baseline, 0, '%')} vs 6-month pre-flight baseline)<br>Neutrophils ${fmt(l.diff.neutrophils, 2)} · Lymphocytes ${fmt(l.diff.lymphocytes, 2)}` : `Result pending until ${esc(missionLabel(m.schedule, l.available, true))}`}<div class="tipmeta">Origin: simulation · ${esc(l.method)} · lab range ${lo}–${hi}</div>`,
     }));
     return [
       { type: 'hband', lo, hi, label: `Lab reference range ${lo}–${hi} ×10⁹/L (OSD-569 lab)` },

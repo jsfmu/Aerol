@@ -156,18 +156,34 @@ export const missionDay = (schedule, t) => (t - schedule.launch) / DAY;
 export const returnDay = (schedule, t) => (t >= schedule.landing ? (t - schedule.landing) / DAY : null);
 
 // L−/FD/R+ notation. L−n counts whole days before launch; FD counts elapsed flight days; R+ elapsed days after landing.
+const days = n => `${n} day${Number(n) === 1 ? '' : 's'}`;
+
+// Plain-language mission time: "141 days before launch", "Flight day 14", "30 days after landing".
 export function missionLabel(schedule, t, precise = false) {
   if (t < schedule.launch) {
     const d = (schedule.launch - t) / DAY;
-    return precise && d < 2 ? `L−${(d * 24).toFixed(0)} h` : `L−${Math.ceil(d - 1e-9)}`;
+    return precise && d < 2 ? `${(d * 24).toFixed(0)} h before launch` : `${days(Math.ceil(d - 1e-9))} before launch`;
   }
   if (t < schedule.landing) {
     const d = (t - schedule.launch) / DAY;
-    return precise ? `FD ${d.toFixed(1)}` : `FD${Math.floor(d)}`;
+    return precise ? `Flight day ${d.toFixed(1)}` : `Flight day ${Math.floor(d)}`;
   }
   const r = (t - schedule.landing) / DAY;
-  if (r < 1) return `R+0 (${(r * 24).toFixed(0)} h)`;
-  return precise ? `R+${r.toFixed(1)}` : `R+${Math.floor(r)}`;
+  if (r < 1) return `Landing day (${(r * 24).toFixed(0)} h after)`;
+  return precise ? `${r.toFixed(1)} days after landing` : `${days(Math.floor(r))} after landing`;
+}
+
+// Convert stored timepoint codes (L-180, FD14, FD~90, R+30) to plain words for display.
+// short: compact form for crowded chart labels.
+export function friendlyCode(code, { short = false } = {}) {
+  const s = String(code ?? '').trim();
+  let m = s.match(/^L\s*[-−]\s*(\d+(?:\.\d+)?)$/);
+  if (m) return short ? `${m[1]}d before` : `${days(m[1])} before launch`;
+  m = s.match(/^FD\s*(~)?\s*(\d+(?:\.\d+)?)$/);
+  if (m) return short ? `${m[1] ? '~' : ''}Day ${m[2]}` : `${m[1] ? 'About flight' : 'Flight'} day ${m[2]}`;
+  m = s.match(/^R\s*\+\s*(\d+(?:\.\d+)?)$/);
+  if (m) return Number(m[1]) < 1 ? 'Landing day' : short ? `${m[1]}d after` : `${days(m[1])} after landing`;
+  return s;
 }
 
 // Validate an edited scenario's schedule. Returns a list of human-readable problems.

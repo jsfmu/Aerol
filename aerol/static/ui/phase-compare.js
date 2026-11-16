@@ -2,7 +2,7 @@
 // timing labels, cohort and origin (shown on hover). Sources are only drawn on a shared axis when they
 // share a unit; observed data are points (never joined), projections/simulations are dashed lines.
 import { isNum, fmt, signed, median } from '../core/util.js';
-import { PHASES, PHASE_LABEL } from '../core/schedule.js';
+import { PHASES, PHASE_LABEL, friendlyCode } from '../core/schedule.js';
 import { twinsTerra, i4Wbc } from '../core/research.js';
 import { esc } from './dom.js';
 import { niceTicks } from './charts.js';
@@ -14,7 +14,7 @@ function seriesData(research, model) {
   const terraPct = [
     { id: 'proj', label: 'Combined report deep-space projection', note: 'illustrative model output, read by eye ±5 pp', origin: 'digitized projection', line: true,
       points: PHASES.filter(p => isNum(rp.terra_pct[p])).map(p => ({ phase: p, v: rp.terra_pct[p], label: PHASE_LABEL[p] })) },
-    { id: 'sim', label: `Simulation · ${model.scenario.astronaut_id}`, note: 'simulated lab draws vs L-180', origin: 'simulation', line: true,
+    { id: 'sim', label: `Simulation · ${model.scenario.astronaut_id}`, note: 'simulated lab draws vs 6-month pre-flight baseline', origin: 'simulation', line: true,
       points: model.labs.filter(l => l.kind === 'terra').map(l => ({ phase: l.phase, v: l.pct, label: l.label, t: l.t })) },
   ];
   const twins = [{ id: 'twins', label: 'NASA Twins Study · flight subject TW (n = 1)', note: 'raw normalized abundance ×10⁻³ — no pre-flight baseline, so no % change', origin: 'observed', line: false,
@@ -23,16 +23,16 @@ function seriesData(research, model) {
   for (const x of i4Wbc(research)) (byLabel[x.label] ||= []).push(x);
   const i4 = Object.entries(byLabel).map(([label, xs]) => {
     const pcts = xs.map(x => x.rec.percent_change_from_baseline).filter(isNum);
-    return { phase: xs[0].rec.mission_phase, v: median(pcts), label, t: xs[0].t, extra: `median of n=${pcts.length}; range ${signed(Math.min(...pcts), 0, '%')} to ${signed(Math.max(...pcts), 0, '%')} vs each crew member's L-92` };
+    return { phase: xs[0].rec.mission_phase, v: median(pcts), label, t: xs[0].t, extra: `median of n=${pcts.length}; range ${signed(Math.min(...pcts), 0, '%')} to ${signed(Math.max(...pcts), 0, '%')} vs each crew member's sample 92 days before launch` };
   });
   const iss = research.records.filter(r => r.study_id === 'combined_radiation_report')
     .map(r => ({ phase: r.mission_phase, v: r.relative_change_percent, label: r.mission_day !== null ? `FD~${r.mission_day}` : `R+${r.return_day}`, t: (r.mission_day ?? 1000 + r.return_day) }));
   const wbcPct = [
-    { id: 'i4', label: 'Inspiration4 (OSD-569) · 4 crew', note: 'median % change vs own L-92', origin: 'observed', line: false, points: i4 },
+    { id: 'i4', label: 'Inspiration4 (OSD-569) · 4 crew', note: 'median % change vs own sample 92 days before launch', origin: 'observed', line: false, points: i4 },
     { id: 'iss', label: 'ISS crew as plotted in the combined report', note: 'aggregate, read by eye ±5 pp; baseline not stated', origin: 'digitized', line: false, points: iss },
     { id: 'proj', label: 'Combined report deep-space projection', note: 'illustrative model output', origin: 'digitized projection', line: true,
       points: PHASES.map(p => ({ phase: p, v: rp.wbc_pct[p], label: PHASE_LABEL[p] })) },
-    { id: 'sim', label: `Simulation · ${model.scenario.astronaut_id}`, note: 'simulated lab draws vs L-180', origin: 'simulation', line: true,
+    { id: 'sim', label: `Simulation · ${model.scenario.astronaut_id}`, note: 'simulated lab draws vs 6-month pre-flight baseline', origin: 'simulation', line: true,
       points: model.labs.filter(l => l.kind === 'wbc').map(l => ({ phase: l.phase, v: l.pct_from_baseline, label: l.label, t: l.t })) },
   ];
   const crucian = { preflight: 'baseline 6 months before launch', early_flight: 'WBC & granulocytes ↑ (significant)', mid_flight: 'elevated, not significant', late_flight: 'WBC ↑ (significant)', landing: 'WBC surge ~3 h after landing', after_return: 'sample 1 month after landing' };
@@ -55,6 +55,7 @@ function phaseChart(series, { title, unit, height = 260, yFmt = v => signed(v, 0
     for (const p of PHASES) {
       const inPhase = s.points.filter(q => q.phase === p && isNum(q.v)).sort((a, b) => (a.t ?? 0) - (b.t ?? 0));
       inPhase.forEach((q, k) => {
+        q = { ...q, below: k % 2 === 1 };
         const f = (k + 1) / (inPhase.length + 1);
         const x = M.l + PHASES.indexOf(p) * colW + colW * (0.12 + 0.76 * f) + (si - (series.length - 1) / 2) * 4;
         pts.push({ ...q, x, y: y(q.v) });
@@ -75,9 +76,9 @@ function phaseChart(series, { title, unit, height = 260, yFmt = v => signed(v, 0
   for (const s of placed) {
     if (s.line && s.pts.length > 1) parts.push(`<path d="${s.pts.map((p, i) => `${i ? 'L' : 'M'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join('')}" fill="none" stroke="${COLORS[s.id]}" stroke-width="2" stroke-dasharray="6 4"/>`);
     for (const p of s.pts) {
-      const tip = `${s.label} · ${p.label}: ${unit === '%' ? signed(p.v, 0, '%') : fmt(p.v, 2) + ' ' + unit}${p.extra ? ' · ' + p.extra : ''} · ${s.origin}`;
+      const tip = `${s.label} · ${friendlyCode(p.label)}: ${unit === '%' ? signed(p.v, 0, '%') : fmt(p.v, 2) + ' ' + unit}${p.extra ? ' · ' + p.extra : ''} · ${s.origin}`;
       const shape = s.line ? `<path d="M${p.x},${p.y - 5.5}L${p.x + 5.5},${p.y}L${p.x},${p.y + 5.5}L${p.x - 5.5},${p.y}Z"` : `<circle cx="${p.x}" cy="${p.y}" r="5"`;
-      parts.push(`<g class="pc-pt">${shape} fill="${COLORS[s.id]}" stroke="var(--panel)" stroke-width="1.5"><title>${esc(tip)}</title>${s.line ? '</path>' : '</circle>'}<text x="${p.x}" y="${p.y - 9}" class="pc-lbl ${s.line ? 'hover-only' : ''}">${esc(p.label)}</text></g>`);
+      parts.push(`<g class="pc-pt">${shape} fill="${COLORS[s.id]}" stroke="var(--panel)" stroke-width="1.5"><title>${esc(tip)}</title>${s.line ? '</path>' : '</circle>'}<text x="${p.x}" y="${p.below ? p.y + 17 : p.y - 9}" class="pc-lbl ${s.line ? 'hover-only' : ''}">${esc(friendlyCode(p.label, { short: true }))}</text></g>`);
     }
   }
   const legend = series.map(s => `<span><i style="background:${COLORS[s.id]}${s.line ? '' : ';border-radius:50%'}"></i><b>${esc(s.label)}</b> <span class="sub">${esc(s.note)}</span></span>`).join('');

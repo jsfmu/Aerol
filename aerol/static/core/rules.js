@@ -113,7 +113,7 @@ export function defaultRules() {
     {
       id: 'lab_wbc_change', version: 1, category: 'lab', metric: 'wbc', unit: '%', type: 'lab_change', threshold_pct: 40,
       label: 'Measured WBC changed from personal baseline', threshold_kind: 'clinically configured change (demo value)',
-      source_policy: 'Demo: |change| ≥ 40% vs matched personal baseline (L-180). Higher WBC does not mean better immunity.',
+      source_policy: 'Demo: |change| ≥ 40% vs matched personal baseline (6 months before launch). Higher WBC does not mean better immunity.',
       levels: [{ severity: 'advisory', threshold: 40, action: 'Medical review at the next conference; note recent stressors and landing timing.', health_check: { needed: true, urgency: 'routine' } }],
       recheck: 'Repeat CBC at next scheduled draw.', escalation_route: CMO,
     },
