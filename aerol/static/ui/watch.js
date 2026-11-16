@@ -106,7 +106,7 @@ export function mountWatchPage(root, store, { navigate, watchOnly = false }) {
     const sc = e.target.closest('[data-selfcare]');
     if (sc) {
       store.addAction({ action: 'selfcare', data: { kind: sc.dataset.selfcare } });
-      toast(sc.dataset.selfcare === 'hydration' ? 'Drink logged (+ hydration quest progress).' : 'Wind-down session logged. Nice.');
+      toast({ hydration: 'Drink logged (+ hydration quest progress).', unwind: 'Wind-down session logged. Nice.', garden: 'Garden tended. Your zinnia grows a little.' }[sc.dataset.selfcare] || 'Logged.');
       return;
     }
     const act = e.target.closest('[data-act]');

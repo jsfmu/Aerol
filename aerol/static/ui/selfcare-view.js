@@ -3,6 +3,7 @@ import { DAY, fmt } from '../core/util.js';
 import { missionLabel } from '../core/schedule.js';
 import { QUESTS, DAY_GOAL, LEVEL_XP, selfCareSummary } from '../core/selfcare.js';
 import { esc } from './dom.js';
+import { gardenWatchCard, gardenPanel } from './garden-view.js';
 
 const SAFETY = 'Points reward habits, never vitals. Reporting symptoms always earns points. Alerts and medical follow-up always come first.';
 
@@ -40,6 +41,7 @@ export function selfcareWatchPage(store, w) {
     <div class="sc-hero"><div class="sc-rings">${rings(s)}<div class="sc-center"><div><b>🔥 ${s.streak}</b><small>day streak</small></div></div></div>
       <div class="sc-meta"><div><b>${s.today.count}/${QUESTS.length}</b> quests today</div><div class="wmuted">Goal ${DAY_GOAL} keeps the streak</div>
       <div class="xpbar"><i style="width:${Math.round(s.levelProgress * 100)}%"></i></div><div class="wmuted">${s.xp % LEVEL_XP}/${LEVEL_XP} XP to Lv ${s.level + 1}</div></div></div>
+    ${gardenWatchCard(s)}
     ${QUESTS.map(q => questButton(q, s, true)).join('')}
     <div class="wk wmuted" style="margin-top:8px">Badges ${earned.length}/${s.badges.length}</div>
     <div class="sc-badges">${s.badges.map(b => `<span class="sc-badge ${b.earned ? 'on' : ''}" title="${esc(b.label)} — ${esc(b.why)}">${b.icon}</span>`).join('')}</div>
@@ -52,6 +54,7 @@ export function selfcareDashboard(store, t) {
   const last = s.days.slice(-28);
   const S = store.model.schedule;
   return `<div class="qgrid">
+    ${gardenPanel(s)}
     <section class="panel sc-panel"><h2>Today</h2><p class="sub">${esc(missionLabel(S, t, true))} · personal progress only — no crew leaderboards.</p>
       <div class="sc-hero light"><div class="sc-rings">${rings(s, 128)}<div class="sc-center"><div><b>🔥 ${s.streak}</b><small>day streak</small></div></div></div>
         <div class="sc-meta"><div class="stat-line"><b>Level ${s.level}</b> · ${s.xp.toLocaleString()} XP</div><div class="xpbar"><i style="width:${Math.round(s.levelProgress * 100)}%"></i></div>

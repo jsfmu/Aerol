@@ -5,6 +5,8 @@
 //  - Self-care never resolves, hides or outranks an alert or a medical follow-up.
 //  - Personal progress only — no crew leaderboards.
 import { DAY, rng } from './util.js';
+import { growGarden, restState } from './garden.js';
+import { latestVitals } from './vitals.js';
 
 export const QUESTS = [
   { id: 'wear', label: 'Wear the band', detail: '≥ 90% of the day', xp: 10, icon: '⌚', auto: true },
@@ -13,8 +15,9 @@ export const QUESTS = [
   { id: 'checkin', label: 'Daily check-in', detail: 'how you feel, any symptoms', xp: 15, icon: '✓', auto: false },
   { id: 'hydration', label: 'Hydration', detail: 'log 4 drinks', xp: 10, icon: '💧', auto: false, target: 4 },
   { id: 'unwind', label: 'Wind-down', detail: '5-min breathing or stretch', xp: 10, icon: '❋', auto: false },
+  { id: 'garden', label: 'Tend the garden', detail: 'real plant care, e.g. a Veggie-style grow unit', xp: 10, icon: '🌱', auto: false },
 ];
-export const DAY_GOAL = 4; // quests per day that keep the streak alive
+export const DAY_GOAL = 4; // quests per day that keep the streak alive (of 7)
 export const LEVEL_XP = 250;
 
 export const BADGES = [
@@ -26,6 +29,8 @@ export const BADGES = [
   { id: 'unwind_3', label: 'Calm crew', icon: '❋', why: '3 wind-down sessions in one week' },
   { id: 'hydrated_week', label: 'Hydrated week', icon: '💧', why: 'Hydration goal met 5 days in one week' },
   { id: 'fast_ack', label: 'On it', icon: '⚑', why: 'Acknowledged an alert within an hour' },
+  { id: 'first_bloom', label: 'First bloom', icon: '🌼', why: 'Grew a zinnia from seed to flower' },
+  { id: 'garden_5', label: 'Green thumb', icon: '🌻', why: 'Five zinnias in your garden' },
 ];
 
 const dayKey = t => Math.floor(t / DAY);
@@ -61,12 +66,14 @@ export function selfCareDays(model, actions, t) {
       checkin: acts.some(a => a.action === 'checkin') || (simulated && simulatedCheckin(scenario.seed, k)),
       hydration: acts.filter(a => a.action === 'selfcare' && a.data?.kind === 'hydration').length >= 4 || (simulated && simulatedCheckin(scenario.seed + 7, k)),
       unwind: acts.some(a => a.action === 'selfcare' && a.data?.kind === 'unwind') || (simulated && simulatedCheckin(scenario.seed + 13, k) && k % 2 === 0),
+      garden: acts.some(a => a.action === 'selfcare' && a.data?.kind === 'garden') || (simulated && simulatedCheckin(scenario.seed + 29, k) && k % 3 !== 0),
     };
     const hydrationCount = acts.filter(a => a.action === 'selfcare' && a.data?.kind === 'hydration').length;
     const xp = QUESTS.reduce((a, q) => a + (done[q.id] ? q.xp : 0), 0)
       + acts.filter(a => a.action === 'checkin' && (a.data?.symptoms || []).length).length * 5; // reporting symptoms is rewarded
     const count = Object.values(done).filter(Boolean).length;
-    out.push({ t: d.t, key: k, done, count, met: count >= DAY_GOAL, xp, simulated, hydrationCount, insufficient: d.insufficient });
+    const reports = acts.filter(a => a.action === 'checkin' && (a.data?.symptoms || []).length).length;
+    out.push({ t: d.t, key: k, done, count, met: count >= DAY_GOAL, xp, simulated, hydrationCount, reports, insufficient: d.insufficient });
   }
   return out;
 }
@@ -92,9 +99,11 @@ export function todayProgress(model, actions, t) {
     checkin: acts.some(a => a.action === 'checkin'),
     hydration: hydration >= 4,
     unwind: acts.some(a => a.action === 'selfcare' && a.data?.kind === 'unwind'),
+    garden: acts.some(a => a.action === 'selfcare' && a.data?.kind === 'garden'),
   };
+  const reports = acts.filter(a => a.action === 'checkin' && (a.data?.symptoms || []).length).length;
   return {
-    done, hydration, hours,
+    done, hydration, hours, reports,
     activeMin: active * S.step / 60000, sleepH: asleep * S.step / 3600000, wearPct: n ? (100 * worn) / n : 0,
     count: Object.values(done).filter(Boolean).length,
     xp: QUESTS.reduce((a, q) => a + (done[q.id] ? q.xp : 0), 0),
@@ -125,9 +134,16 @@ export function selfCareSummary(model, actions, t) {
     const ep = model.alerts.episodes.find(e => e.episode_id === a.episode_id);
     if (ep && a.t - ep.start <= 3600000) badges.add('fast_ack');
   }
+  // The mission garden is planted at launch; pre-flight habits still count for streaks and XP.
+  const planted = t >= model.schedule.launch;
+  const garden = growGarden(planted ? days.filter(d => d.t >= model.schedule.launch) : [], planted ? today : { count: 0 },
+    restState(model, actions, t, latestVitals(model.vitals, t).missing), { planted });
+  if (garden.blooms >= 1) badges.add('first_bloom');
+  if (garden.blooms >= 5) badges.add('garden_5');
   return {
     days, today, streak: streak + (today.count >= DAY_GOAL ? 1 : 0), best: Math.max(best, streak + (today.count >= DAY_GOAL ? 1 : 0)),
     xp, level: 1 + Math.floor(xp / LEVEL_XP), levelProgress: (xp % LEVEL_XP) / LEVEL_XP,
+    garden,
     badges: BADGES.map(b => ({ ...b, earned: badges.has(b.id) })),
     includesSimulatedHistory: days.some(d => d.simulated),
   };

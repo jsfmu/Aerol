@@ -343,3 +343,22 @@ button.quest:hover{border-color:var(--teal)}
 .sc-badge-card{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:8px;opacity:.5;filter:grayscale(1)}
 .sc-badge-card.on{opacity:1;filter:none;border-color:#ffb54799}
 .sc-badge-card span{font-size:22px}.sc-badge-card b{display:block;font-size:12.5px}.sc-badge-card small{font-size:11px;color:var(--muted)}
+/* Zinnia garden */
+.garden-card{padding:7px 9px}
+.garden-row{display:flex;gap:8px;align-items:center}
+.garden-card .zinnia{--z-bg:#151d1f;flex:0 0 auto}
+.growbar{height:6px;border-radius:4px;background:#1f3324;overflow:hidden;margin:4px 0}
+.growbar i{display:block;height:100%;background:linear-gradient(90deg,#4caf50,#9be564);border-radius:4px}
+.growbar.big{height:9px;background:var(--line);max-width:260px}
+.garden-panel .zinnia{--z-bg:var(--panel);flex:0 0 auto}
+.garden-hero{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.garden-hero .stat-line{font-size:16px}
+.stages{display:flex;gap:4px;flex-wrap:wrap;margin:6px 0}
+.stages span{font-size:10.5px;padding:2px 7px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.stages span.on{background:#e3f4da;border-color:#9fd77a;color:#2e6b14}
+.garden-shelf{display:flex;flex-wrap:wrap;gap:4px;align-items:center;padding:8px;border-radius:10px;background:linear-gradient(180deg,transparent 60%,#b5653a33 60%)}
+.zinnia .zinnia-head{transform-origin:50px 34px;animation:sway 6s ease-in-out infinite}
+@keyframes sway{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}
+.zinnia .sparkle{animation:twinkle 1.4s ease-in-out infinite}
+@keyframes twinkle{0%,100%{opacity:.3}50%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.zinnia .zinnia-head,.zinnia .sparkle{animation:none}}

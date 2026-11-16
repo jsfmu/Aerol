@@ -268,3 +268,27 @@ test('self-care streak only scores finished days (no future data)', async () => 
   const without = selfCareSummary(model, [], t);
   assert.equal(withAction.best, without.best, 'logging today never erases past streak days');
 });
+
+test('zinnia garden grows from habits, rests during health alerts, never declines', async () => {
+  const { selfCareSummary } = await import('../../aerol/static/core/selfcare.js');
+  const { growGarden, BLOOM_AT } = await import('../../aerol/static/core/garden.js');
+  let prev = -1;
+  for (let d = -40; d <= 200; d += 5) {
+    const g = selfCareSummary(model, [], at(d)).garden;
+    assert.ok(g.total >= prev, `garden total never decreases (day ${d})`);
+    prev = g.total;
+  }
+  const ill = selfCareSummary(model, [], at(98.5)).garden;
+  assert.equal(ill.resting, true, 'rests during the illness alert');
+  const off = selfCareSummary(model, [], at(122.3)).garden;
+  assert.equal(off.resting, true, 'rests while the band is disconnected');
+  assert.equal(selfCareSummary(model, [], at(30.5)).garden.resting, false);
+  const g = growGarden([{ count: BLOOM_AT - 10, reports: 1 }, { count: 4, reports: 0 }], { count: 5, reports: 0 });
+  assert.equal(g.total, BLOOM_AT); assert.equal(g.blooms, 1); assert.equal(g.justBloomed, true); assert.equal(g.stage.id, 'bloom');
+  assert.equal(growGarden([], { count: 0 }).stage.id, 'seed');
+  const late = selfCareSummary(model, [], at(150));
+  assert.ok(late.garden.blooms >= 5 && late.garden.blooms <= 15, `blooms ${late.garden.blooms}`);
+  assert.ok(late.badges.find(b => b.id === 'garden_5').earned);
+  assert.equal(selfCareSummary(model, [], at(-20)).garden.planted, false, 'planted at launch');
+  assert.ok(BLOOM_AT > 0);
+});
