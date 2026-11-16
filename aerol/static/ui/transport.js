@@ -61,8 +61,9 @@ export function mountTransport(el, store) {
     const t = store.t;
     const { start, end } = m.schedule;
     $('#tp-head', el).style.left = `${((t - start) / (end - start)) * 100}%`;
-    $('#tp-label', el).textContent = missionLabel(m.schedule, t, true);
-    $('#tp-sub', el).textContent = `${iso(t).slice(0, 16).replace('T', ' ')} UTC · ${PHASE_LABEL[phaseAt(m.schedule, t)]} · ${REGION_LABEL[regionAt(m.schedule, t)]}`;
+    const ph = phaseAt(m.schedule, t);
+    $('#tp-label', el).textContent = ph === 'landing' ? 'Landing day' : PHASE_LABEL[ph];
+    $('#tp-sub', el).textContent = `${missionLabel(m.schedule, t)} · ${REGION_LABEL[regionAt(m.schedule, t)]} · ${iso(t).slice(0, 16).replace('T', ' ')} UTC`;
     const play = el.querySelector('[data-tp="play"]');
     play.textContent = store.state.clock.playing ? '❚❚' : '▶';
     play.setAttribute('aria-label', store.state.clock.playing ? 'Pause mission clock' : 'Play mission clock');
