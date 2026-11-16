@@ -15,7 +15,7 @@ import { CREW_SECTIONS, crewHome, crewFollowup, crewLearn, crewActions, selfcare
 import { $, esc, toast, download, throttle, openDialog } from './dom.js';
 
 const AUDIENCES = { crew: 'Crew member (onboard)', physician: 'Full mission view (crew + Earth team)' };
-const PHYS_SECTIONS = [['timeline', 'Mission timeline · body & exposure'], ['phases', 'Compare with past missions'], ['review', 'Health reviews & messages'], ['events', 'What happened & why'], ['schedule', 'Schedule & blood draws'], ['data', 'Alert rules & data records'], ['sources', 'How it works & sources']];
+const PHYS_SECTIONS = [['timeline', 'Mission timeline · body & exposure'], ['phases', 'Compare with past missions'], ['review', 'Health reviews & messages'], ['events', 'What happened & why'], ['schedule', 'Schedule & blood draws'], ['data', 'Alert rules & data records']];
 
 export function mountEarth(root, store, { research, navigate }) {
   let saved = null;
@@ -75,7 +75,7 @@ export function mountEarth(root, store, { research, navigate }) {
       content.innerHTML = '<div id="tl-host"></div>';
       if (ui.mode === 'simulation' || ui.audience === 'crew') ui.timeline = mountTimeline($('#tl-host', root), store, { simulationRecords: simRecords, audience: ui.audience });
       else ui.observed = mountObserved($('#tl-host', root), research);
-    } else content.innerHTML = { 'crew-home': () => crewHome(store), selfcare: () => selfcareDashboard(store, store.t), 'crew-followup': () => crewFollowup(store), 'crew-learn': crewLearn, phases: phasesHtml, review: reviewHtml, events: eventsHtml, schedule: scheduleHtml, data: dataHtml, sources: sourcesHtml }[ui.section]();
+    } else content.innerHTML = { 'crew-home': () => crewHome(store), selfcare: () => selfcareDashboard(store, store.t), 'crew-followup': () => crewFollowup(store), 'crew-learn': crewLearn, phases: phasesHtml, review: reviewHtml, events: eventsHtml, schedule: scheduleHtml, data: dataHtml }[ui.section]();
   }
 
   // ---------- Phase comparison ----------
@@ -185,37 +185,6 @@ export function mountEarth(root, store, { research, navigate }) {
       <section class="panel"><h2>Export</h2><div class="row">
         <button class="btn small" data-io="sim">Simulation records (JSON)</button><button class="btn small" data-io="obs">Observed research records (JSON)</button>
         <button class="btn small" data-io="workspace">Workspace (scenario, rules, actions)</button><label class="btn small">Import workspace<input type="file" id="ws-file" accept=".json" hidden></label></div></section>`;
-  }
-
-  // ---------- Model & sources ----------
-  function sourcesHtml() {
-    const m = store.model;
-    const sc = m.scenario;
-    const checks = workedChecks();
-    const reg = m.registry;
-    return `<div class="qgrid">
-      <section class="panel"><h2>How the projections work</h2><p class="sub"><b>For astronauts:</b> these are hand-set what-if models, not predictions of your health.</p>
-        ${['terra', 'wbc'].map(k => `<h3>${esc(reg[k].model_id)} v${esc(reg[k].model_version)} <span class="chip sim">${esc(reg[k].mode)}</span></h3><p class="sub">${esc(reg[k].training_status)}. ${esc(reg[k].validation_status)}. ${esc(reg[k].coverage_note)}</p>`).join('')}
-        <pre>TERRA fold F(t) = max(0, 1 + S(t) + R(t) + L(t))
-S stress (hypothesis): A·smoothstep before launch, A·exp(−Δt/τs) after
-  A=${sc.stress.amplitude}, onset L−${sc.stress.onset_days_before_launch}, τs=${sc.stress.decay_days} d
-R radiation history: dR/dt = (k·r(t−lag) − R)/τ
-  k=${sc.terra.sensitivity} fold per mSv/day, lag=${sc.terra.lag_days} d, τrise=${sc.terra.rise_days} d, τrecovery=${sc.terra.recovery_days} d
-L landing (optional): ${sc.terra.landing_amplitude}·exp(−Δt/${sc.terra.landing_decay_days} d)
-Residual variation (simulated samples only): SD ${sc.terra.residual_sd} × fold
-WBC W(t) = W0·(1 + s_w·Ŝ + F_flight + k_w·r̄ + L_w), W0=${sc.wbc.baseline} ×10⁹/L
-  flight ${sc.wbc.flight_adaptation} (τ ${sc.wbc.adaptation_days} d), k_w ${sc.wbc.radiation_per_mSv_day}, landing ${sc.wbc.landing_amplitude} (τ ${sc.wbc.landing_decay_days} d)
-Outputs clamped at 0 (count of clamped points: ${m.terra.clamped}).</pre>
-        <h3>Learned mode <span class="chip">unavailable</span></h3><p class="sub">${esc(reg.learned.reason)}</p><ul class="sub">${reg.learned.requirements.map(r => `<li>${esc(r)}</li>`).join('')}</ul>
-        <p class="sub">No error metrics are shown because none have been measured. Beyond-magnetosphere outputs are extrapolations of assumptions.</p></section>
-      <section class="panel"><h2>How radiation dose is counted</h2><p class="sub">r(t) = dD/dt; D(t+Δt) = D(t) + r·Δt_days, integrated over real elapsed time and split at every exposure transition. Cumulative dose plateaus after landing and never falls.</p>
-        <table><tbody>${checks.map(c => `<tr><td>${esc(c.description)}</td><td>${esc(c.working)}</td><td class="${c.pass ? 'ok' : 'bad'}">${c.pass ? '✓' : '✗'} ${c.computed} mSv</td></tr>`).join('')}</tbody></table>
-        <h3>Dose quantities</h3>${Object.values(QUANTITIES).map(q => `<p class="sub"><b>${esc(q.label)}</b> — ${esc(q.note)}</p>`).join('')}
-        <p class="sub">The 1.84 mSv/day preset is a historical cruise reference, not a safety threshold. The NASA 600 mSv career limit is NASA effective dose and is not compared directly with scenario dose-equivalent totals.</p>
-        <p class="sub">The combined report's 340-day constant-rate total (625.60 mSv) and its 6-month biological projection (≈335 mSv) use different durations and are kept separate.</p></section>
-      <section class="panel" style="grid-column:1/-1"><h2>Where the data come from (sources &amp; verification)</h2><table><thead><tr><th>Source</th><th>Status</th><th>Use & limits</th></tr></thead><tbody>
-        ${(research?.sources || []).map(s => `<tr><td>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a>` : esc(s.title)}</td><td><span class="chip">${esc(s.status)}</span>${s.checked ? `<br><span class="sub">checked ${esc(s.checked)}</span>` : ''}</td><td class="sub">${esc(s.note)}${s.sha256 ? `<br>SHA-256 ${esc(s.sha256.slice(0, 16))}…` : ''}</td></tr>`).join('')}
-      </tbody></table><p class="sub">No NASA endorsement is implied. Synthetic identities only (${esc(sc.astronaut_id)}).</p></section></div>`;
   }
 
   // ---------- events ----------

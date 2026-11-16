@@ -30,7 +30,7 @@ L(t)  optional landing term A_L·exp(−(t−landing)/τL), default A_L=0
 
 Residual variation (SD 6% of fold) is added only to simulated lab samples, never to the projection
 curve. Cumulative dose never decreases, while R(t) declines once exposure falls. Values below zero
-are clamped (count reported in Model & sources). Integration step: 6 h, exact exponential update.
+are clamped (count tracked in the model output). Integration step: 6 h, exact exponential update.
 
 Default story: pre-flight rise to ~1.35×; partial decline after launch (stress decays faster than
 the inside-magnetosphere term rises); after the magnetosphere exit the response starts after the
@@ -62,7 +62,7 @@ rejects `confidence_interval` on simulation records.
 
 Dose rate r(t) [mSv/day], accumulated dose D(t) [mSv], and step changes in rate are kept separate.
 Segments are piecewise constant and split at every transition (region changes, belt transits, SPE
-start/end). D(t) is the exact integral. Worked checks (Model & sources tab, both test suites):
+start/end). D(t) is the exact integral. Worked checks (both test suites):
 7 d × 0.7 + 3 d × 1.84 = 10.42 mSv; 340 d × 1.84 = 625.60 mSv (hypothetical arithmetic; the Twins
 Study recorded 76.18 mGy physical dosimeter dose and 146.34 mSv effective dose).
 

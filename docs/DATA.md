@@ -1,6 +1,6 @@
 # Data sources, verification and limits
 
-Checked 2026-11-15 unless stated. Statuses also appear in the dashboard (Model & sources).
+Checked 2026-11-15 unless stated.
 
 | Source | Status | Used for | Limits |
 |---|---|---|---|
