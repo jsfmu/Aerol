@@ -31,6 +31,7 @@ export function mountObserved(host, research) {
     const phases = twinsPhases(research);
     group = new ChartGroup({ domain: [launch - 20 * DAY, landing + 205 * DAY], formatTime: label });
     group.tickAnchor = launch;
+    group.phaseTicks = () => phases.map(p => ({ ...p, label: p.phase === 'landing' ? 'Landing day' : PHASE_LABEL[p.phase] }));
     group.tipContext = t => `<div class="tipmeta">${esc(label(t))} · ${esc(iso(t).slice(0, 10))}</div>`;
     const terra = group.add(new TimeChart($('#o-terra', host), { height: 160, title: 'TERRA (UUAGGG) · real astronaut data (NASA Twins Study)', unit: 'normalized abundance ×10⁻³ (raw)', yFormat: v => fmt(v, 2) }));
     const rate = group.add(new TimeChart($('#o-rate', host), { height: 120, title: `Station absorbed dose rate · ${ui.detector}`, unit: 'µGy/h (daily time-weighted mean; gaps = no coverage)', yFormat: v => fmt(v, 1) }));

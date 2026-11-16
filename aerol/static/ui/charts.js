@@ -131,7 +131,24 @@ export class TimeChart {
       for (const v of ticks) parts.push(`<line class="grid" x1="${M.left}" x2="${W - M.right}" y1="${this.y(v)}" y2="${this.y(v)}"/><text class="ytick" x="${M.left - 6}" y="${this.y(v) + 3}">${esc(this.yFormat(v))}</text>`);
     }
     // x ticks
-    for (const tk of timeTicks(t0, t1, W, this.group.tickAnchor ?? 0)) {
+    if (this.group.phaseTicks) {
+      // x-axis labeled by mission phase: a gridline at each phase boundary, the phase name centered on its visible span
+      const phases = this.group.phaseTicks();
+      let lastRight = -Infinity;
+      for (const p of phases) {
+        if (p.end <= t0 || p.start >= t1) continue;
+        if (p.start > t0) { const xb = this.x(p.start); parts.push(`<line class="xgrid" x1="${xb}" x2="${xb}" y1="${M.top}" y2="${H - M.bottom}"/>`); }
+        const a = this.x(Math.max(p.start, t0));
+        const b = this.x(Math.min(p.end, t1));
+        const label = p.label;
+        const half = label.length * 3.1;
+        let cx = (a + b) / 2;
+        if (cx - half < lastRight + 6) cx = lastRight + 6 + half; // nudge right instead of overlapping
+        if (cx + half > W - M.right + 2) continue;
+        parts.push(`<text class="xtick" x="${cx}" y="${H - 6}">${esc(label)}</text>`);
+        lastRight = cx + half;
+      }
+    } else for (const tk of timeTicks(t0, t1, W, this.group.tickAnchor ?? 0)) {
       const xx = this.x(tk);
       parts.push(`<line class="xgrid" x1="${xx}" x2="${xx}" y1="${M.top}" y2="${H - M.bottom}"/><text class="xtick" x="${xx}" y="${H - 6}">${esc(this.group.formatTime(tk, t1 - t0))}</text>`);
     }

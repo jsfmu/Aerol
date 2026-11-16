@@ -49,6 +49,7 @@ export function mountTimeline(host, store, ctx) {
     onSelect: sel => { ui.selection = sel; renderSide(); },
   });
   group.tickAnchor = m0.schedule.launch;
+  group.phaseTicks = () => store.model.schedule.phases.map(p => ({ ...p, label: p.phase === 'landing' ? 'Landing day' : PHASE_LABEL[p.phase] }));
   group.tipContext = t => {
     const S = store.model.schedule;
     return `<div class="tipmeta">${esc(missionLabel(S, t, true))} · ${esc(iso(t).slice(0, 16))}Z<br>${esc(PHASE_LABEL[phaseAt(S, t)])} · ${esc(REGION_LABEL[regionAt(S, t)])}<br>Origin: simulation (hand-set simulator)</div>`;
