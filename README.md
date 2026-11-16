@@ -17,7 +17,7 @@ python3 -m aerol            # Python 3.9+; no third-party packages
 | URL | Experience |
 |---|---|
 | http://127.0.0.1:8000/ | **Astronaut watch** simulator + demo walkthrough |
-| http://127.0.0.1:8000/earth/ | **Earth dashboard** — “View as” **crew member** (onboard, plain language, own data, no link delay) or **Earth physician & research team** (delayed ground view, review queues, research tools) |
+| http://127.0.0.1:8000/dashboard/ | **Dashboard** — “View as” **crew member** (onboard, plain language, own data, no link delay) or **Earth physician & research team** (delayed ground view, review queues, research tools) |
 | http://127.0.0.1:8000/mobile/ | Watch only (phone layout) |
 
 Both experiences share one store and one simulation clock (synced across tabs), so the watch and
@@ -94,7 +94,7 @@ aerol/schema.py            record validator (mirrors core/schema.js)
 aerol/radiation.py         dose integration (mirrors core/radiation.js)
 aerol/model_adapter.py     slot for a future trained model (learned mode)
 aerol/static/core/         pure JS modules (schedule, radiation, models, vitals, rules, events, store, schema, research, export)
-aerol/static/ui/           watch, transport, charts, Earth dashboard views
+aerol/static/ui/           watch, transport, charts, dashboard views
 aerol/static/data/         research.json (validated observed records)
 aerol/data/                source files (RadLab raw export, snapshot, OSD-569 CBC CSV)
 scripts/                   data build + fixture generation

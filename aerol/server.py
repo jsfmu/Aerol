@@ -337,7 +337,7 @@ def application(environ, start_response):
             if method != 'GET':
                 raise APIError('Method not allowed', 405)
             route = {'/': 'index.html', '/mobile': 'index.html', '/mobile/': 'index.html',
-                     '/earth': 'index.html', '/earth/': 'index.html',
+                     '/earth': 'index.html', '/earth/': 'index.html', '/dashboard': 'index.html', '/dashboard/': 'index.html',
                      '/downloads/iss-radiation.csv.gz': '../data/iss-radiation.csv.gz'}.get(path)
             if path == '/downloads/iss-radiation.csv.gz':
                 file = DATA / 'iss-radiation.csv.gz'

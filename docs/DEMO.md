@@ -1,6 +1,6 @@
 # Demo walkthrough
 
-Start `python3 -m aerol` and open http://127.0.0.1:8000/. Optional: open http://127.0.0.1:8000/earth/
+Start `python3 -m aerol` and open http://127.0.0.1:8000/. Optional: open http://127.0.0.1:8000/dashboard/
 in a second window — both follow the same clock.
 
 | # | Step | What to show | What to say |
@@ -13,7 +13,7 @@ in a second window — both follow the same clock.
 | 6 | Earth research review | Review queue after the outage: evidence packets, physician message back, research review for TERRA projection, editable check-up brief | Research items never trigger treatment; messages are simulated. |
 | 7 | Landing & recovery | Follow-up screen at R+1.3; Earth timeline: dose plateau, R+0 WBC result, TERRA relaxing toward 1.0× | Cumulative dose never falls; in-flight TERRA samples are assayed on Earth after return. |
 
-Extras worth showing on the Earth dashboard: compare scenarios (“stays inside magnetosphere”), move
+Extras worth showing on the dashboard: compare scenarios (“stays inside magnetosphere”), move
 the TERRA lag/sensitivity sliders, select an interval and export the annotated report, click any
 marker for its seven-question explanation, switch to **Observed research** (Twins TERRA + DosTel;
 Inspiration4 CBC), and the **Phase comparison** table. Use the scenario menu → “Default + assumed

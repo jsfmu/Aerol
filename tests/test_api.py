@@ -98,7 +98,7 @@ class APITests(unittest.TestCase):
             self.assertEqual(self.request('/api/readings',extra={'HTTP_AUTHORIZATION':'Bearer test-token'})[0],200)
 
     def test_entry_points_modules_and_manifest(self):
-        for path in ('/','/mobile/','/earth/','/earth','/manifest.webmanifest','/data/research.json','/ui/main.js','/core/store.js'):
+        for path in ('/','/mobile/','/dashboard/','/dashboard','/earth/','/earth','/manifest.webmanifest','/data/research.json','/ui/main.js','/core/store.js'):
             self.assertEqual(self.request(path)[0],200,path)
         env={};setup_testing_defaults(env);env.update(PATH_INFO='/core/store.js',REQUEST_METHOD='GET')
         headers=[]

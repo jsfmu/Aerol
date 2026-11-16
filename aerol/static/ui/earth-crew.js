@@ -1,4 +1,4 @@
-// Earth dashboard · crew-member view. Runs onboard (no link delay for the crew's own data),
+// Dashboard · crew-member view. Runs onboard (no link delay for the crew's own data),
 // in plain language. Physicians use the other audience view; both read the same store.
 import { DAY, isNum, fmt, signed, sampleGrid } from '../core/util.js';
 import { missionLabel, PHASE_LABEL, REGION_LABEL } from '../core/schedule.js';

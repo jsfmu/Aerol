@@ -1,4 +1,4 @@
-// Earth dashboard · synchronized simulation timeline (TERRA, WBC, dose rate, cumulative dose, events).
+// Dashboard · synchronized simulation timeline (TERRA, WBC, dose rate, cumulative dose, events).
 import { DAY, HOUR, isNum, fmt, signed, sampleGrid, iso } from '../core/util.js';
 import { missionLabel, phaseAt, regionAt, PHASE_LABEL, REGION_LABEL } from '../core/schedule.js';
 import { doseAt, rateAt, rateSteps } from '../core/radiation.js';
@@ -36,6 +36,7 @@ export function mountTimeline(host, store, ctx) {
         <span>samples appear only once their result is available (draws are marked in the Samples row)</span><span><span class="sw c-terra-b"></span>comparison scenario</span><span>shaded: scenario sensitivity range</span>
       </div>
       <div class="charts"><div id="c-terra"></div><div id="c-wbc"></div><div id="c-rate"></div><div id="c-dose"></div><div id="c-strip"></div></div>
+      <p class="sub" style="margin-top:6px"><b>For astronauts:</b> dashed lines are simulated projections for a synthetic astronaut, not measurements of you. Diamonds are lab results, shown once the lab has reported them. 0% on TERRA means the same as baseline. Alerts always reach your watch first.</p>
       <p class="sub" style="margin-top:6px">Drag to pan · Shift-drag or “Select” to choose an interval · Ctrl/⌘-scroll to zoom · click a chart to move the mission clock · click a marker for its explanation.</p>
     </div><aside class="side" id="tl-side"></aside></div>`;
 
@@ -53,11 +54,11 @@ export function mountTimeline(host, store, ctx) {
     return `<div class="tipmeta">${esc(missionLabel(S, t, true))} · ${esc(iso(t).slice(0, 16))}Z<br>${esc(PHASE_LABEL[phaseAt(S, t)])} · ${esc(REGION_LABEL[regionAt(S, t)])}<br>Origin: simulation (hand-set simulator)</div>`;
   };
   const charts = {
-    terra: group.add(new TimeChart($('#c-terra', host), { height: 170, title: 'TERRA', unit: '% change from matched personal baseline', note: '0% = 1.0× baseline, not zero molecules' })),
-    wbc: group.add(new TimeChart($('#c-wbc', host), { height: 150, title: 'White blood cells', unit: '×10⁹/L', note: 'lab reference range shaded' })),
-    rate: group.add(new TimeChart($('#c-rate', host), { height: 110, title: 'Ionizing-radiation dose rate r(t)', unit: 'mSv/day (dose-equivalent reference)', zeroBased: true, yFormat: v => fmt(v, 2) })),
-    dose: group.add(new TimeChart($('#c-dose', host), { height: 120, title: 'Cumulative mission dose D(t)', unit: 'mSv · plateaus after landing, never falls', zeroBased: true, yFormat: v => fmt(v, 0) })),
-    strip: group.add(new TimeChart($('#c-strip', host), { height: 132, title: 'Mission phases · exposure regions · events', unit: '', kind: 'strip' })),
+    terra: group.add(new TimeChart($('#c-terra', host), { height: 170, title: 'TERRA · telomere RNA (lab blood test, research marker)', unit: '% change from your own baseline', note: '0% = 1.0× baseline, not zero molecules' })),
+    wbc: group.add(new TimeChart($('#c-wbc', host), { height: 150, title: 'White blood cells · immune cells (lab blood test)', unit: '×10⁹/L', note: 'shaded band = normal lab range' })),
+    rate: group.add(new TimeChart($('#c-rate', host), { height: 110, title: 'Radiation dose rate r(t) · how fast exposure is adding up', unit: 'mSv/day (dose-equivalent reference)', zeroBased: true, yFormat: v => fmt(v, 2) })),
+    dose: group.add(new TimeChart($('#c-dose', host), { height: 120, title: 'Mission dose total D(t) · running exposure', unit: 'mSv · plateaus after landing, never falls', zeroBased: true, yFormat: v => fmt(v, 0) })),
+    strip: group.add(new TimeChart($('#c-strip', host), { height: 132, title: 'Mission phase · where the spacecraft is · events', unit: '', kind: 'strip' })),
   };
 
   function terraLayers(m, cmp) {
@@ -150,7 +151,7 @@ export function mountTimeline(host, store, ctx) {
 
   function renderTools() {
     const tg = (k, label) => `<button class="btn small ${ui[k] ? 'on' : ''}" data-tg="${k}" aria-pressed="${ui[k]}">${label}</button>`;
-    $('#tl-tools', host).innerHTML = `${tg('obs', 'Simulated samples')}${tg('proj', 'Projections')}${tg('band', 'Sensitivity range')}${tg('diff', 'WBC differential')}
+    $('#tl-tools', host).innerHTML = `${tg('obs', 'Lab results (simulated)')}${tg('proj', 'Projections (model)')}${tg('band', 'What-if range')}${tg('diff', 'WBC cell types')}
       <button class="btn small" data-act="units">${ui.pct ? '% change' : 'fold ×'}</button><span class="sep"></span>
       <label class="sub">Compare <select id="tl-cmp" class="btn small">${[['', 'none'], ['leo-only', 'Stays inside magnetosphere'], ['deep-whole', 'Beyond magnetosphere whole flight'], ['spe-event', 'Default + solar particle event'], ['hypothesis-default', 'Default preset']].map(([v, l]) => `<option value="${v}" ${(ui.compare ? store.state.compareId : '') === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
       <span class="sep"></span><button class="btn small" data-act="zin" aria-label="Zoom in">＋</button><button class="btn small" data-act="zout" aria-label="Zoom out">－</button>
@@ -249,12 +250,12 @@ export function mountTimeline(host, store, ctx) {
       return;
     }
     const steps = rateSteps(m.segments).filter(s => s.t >= m.schedule.launch && s.t < m.schedule.landing);
-    parts.push(`<section class="panel"><h2>Lag inspector</h2><p class="sub">Time from each exposure step to the simulated TERRA response (vs a no-step counterfactual). Timestamps are never shifted.</p>
+    parts.push(`<section class="panel"><h2>Lag inspector · how long the body takes to respond</h2><p class="sub">Time from each exposure step to the simulated TERRA response (vs a no-step counterfactual). Timestamps are never shifted.</p>
       <table><thead><tr><th>Step</th><th>Rate</th><th>Onset</th><th>50%</th></tr></thead><tbody>${steps.map(st => {
         const L = lagInspector(m, st.t);
         return L ? `<tr><td>${esc(missionLabel(m.schedule, st.t, true))}<br><span class="sub">${esc(st.region_label)}</span></td><td>${fmt(st.from, 2)}→${fmt(st.to, 2)}</td><td>${fmt(L.onset_days, 1)} d</td><td>${L.half_response_days === null ? 'not reached' : fmt(L.half_response_days, 1) + ' d'}</td></tr>` : '';
       }).join('')}</tbody></table><p class="sub">Assumed lag ${sc.terra.lag_days} d; rise τ ${sc.terra.rise_days} d; recovery τ ${sc.terra.recovery_days} d.</p></section>`);
-    parts.push(`<section class="panel"><h2>Model assumptions</h2><p class="sub">Hypothesis-driven simulator — adjust and see consequences. Exposure duration: ${isNum(sc.exit_day) ? fmt(sc.reentry_day - sc.exit_day, 0) + ' days beyond the magnetosphere' : 'no exit in this scenario'}.</p>
+    parts.push(`<section class="panel"><h2>Model assumptions (what-if settings)</h2><p class="sub">Hypothesis-driven simulator — adjust and see consequences. Exposure duration: ${isNum(sc.exit_day) ? fmt(sc.reentry_day - sc.exit_day, 0) + ' days beyond the magnetosphere' : 'no exit in this scenario'}.</p>
       ${SLIDERS.map(([path, label, min, max, step]) => {
         const v = getPath(sc, path);
         if (!isNum(v)) return `<div class="slider"><span>${esc(label)}</span><output>n/a</output></div>`;

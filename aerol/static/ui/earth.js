@@ -1,4 +1,4 @@
-// Earth dashboard with two audiences: crew members (onboard, plain language, their own data)
+// Dashboard with two audiences: crew members (onboard, plain language, their own data)
 // and Earth physicians/researchers (delayed ground view, review tools). Same store, same clock.
 import { DAY, isNum, fmt, iso, signed } from '../core/util.js';
 import { missionLabel, PHASES, PHASE_LABEL, REGION_LABEL, validateScenario } from '../core/schedule.js';
@@ -14,8 +14,8 @@ import { mountObserved } from './earth-observed.js';
 import { CREW_SECTIONS, crewHome, crewFollowup, crewLearn, crewActions, selfcareDashboard } from './earth-crew.js';
 import { $, esc, toast, download, throttle, openDialog } from './dom.js';
 
-const AUDIENCES = { crew: 'Crew member (onboard)', physician: 'Earth physician & research team' };
-const PHYS_SECTIONS = [['timeline', 'Mission timeline'], ['phases', 'Phase comparison'], ['review', 'Review queue'], ['events', 'Events & explanations'], ['schedule', 'Mission schedule'], ['data', 'Rules, schema & data'], ['sources', 'Model & sources']];
+const AUDIENCES = { crew: 'Crew member (onboard)', physician: 'Full mission view (crew + Earth team)' };
+const PHYS_SECTIONS = [['timeline', 'Mission timeline · body & exposure'], ['phases', 'Compare with past missions'], ['review', 'Health reviews & messages'], ['events', 'What happened & why'], ['schedule', 'Schedule & blood draws'], ['data', 'Alert rules & data records'], ['sources', 'How it works & sources']];
 
 export function mountEarth(root, store, { research, navigate }) {
   let saved = null;
@@ -34,7 +34,7 @@ export function mountEarth(root, store, { research, navigate }) {
     root.querySelectorAll('[data-aud]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.aud === ui.audience)));
     $('#e-navnote', root).textContent = ui.audience === 'crew'
       ? 'Your own data, onboard and current. Physicians on Earth see the same records after the link delay.'
-      : 'For physicians and researchers. TERRA and WBC require laboratory assays; the watch never measures them. Every series is labeled observed, digitized, model prediction or simulation.';
+      : 'For astronauts and the Earth team alike. TERRA and white blood cells come from lab blood tests; the watch never measures them. Every series is labeled observed (real), digitized, model prediction or simulation.';
   }
 
   function renderHead() {
@@ -43,7 +43,7 @@ export function mountEarth(root, store, { research, navigate }) {
     $('#e-title', root).textContent = title;
     $('#e-sub', root).textContent = `${store.model.scenario.name} · ${store.model.scenario.description}`;
     root.querySelectorAll('[data-sec]').forEach(b => b.setAttribute('aria-current', String(b.dataset.sec === ui.section)));
-    $('#e-mode', root).innerHTML = ui.section === 'timeline' && ui.audience === 'physician' ? `<div class="seg" role="group" aria-label="Data mode"><button data-mode="simulation" aria-pressed="${ui.mode === 'simulation'}">Hypothesis-driven simulation</button><button data-mode="observed" aria-pressed="${ui.mode === 'observed'}">Observed research</button></div>` : '';
+    $('#e-mode', root).innerHTML = ui.section === 'timeline' && ui.audience === 'physician' ? `<div class="seg" role="group" aria-label="Data mode"><button data-mode="simulation" aria-pressed="${ui.mode === 'simulation'}">Simulated mission (what-if)</button><button data-mode="observed" aria-pressed="${ui.mode === 'observed'}">Real mission data (observed)</button></div>` : '';
     renderFresh();
   }
 
@@ -58,7 +58,7 @@ export function mountEarth(root, store, { research, navigate }) {
       return;
     }
     el.classList.toggle('stale', staleH !== null && staleH > 12);
-    el.innerHTML = `<b>Ground view</b><span>Astronaut-originated data current through ${g.latestCreated ? esc(missionLabel(store.model.schedule, g.latestCreated, true)) : '—'}${staleH !== null ? ` (${fmt(staleH, 1)} h behind mission clock ${esc(missionLabel(store.model.schedule, t, true))})` : ''}</span>
+    el.innerHTML = `<b>What Earth can see</b><span>Astronaut-originated data current through ${g.latestCreated ? esc(missionLabel(store.model.schedule, g.latestCreated, true)) : '—'}${staleH !== null ? ` (${fmt(staleH, 1)} h behind mission clock ${esc(missionLabel(store.model.schedule, t, true))})` : ''}</span>
       <span class="chip">${g.queued.length} packet(s) queued onboard</span><span class="sub">Simulated link; no real ground station.</span>`;
   }
 
@@ -102,7 +102,7 @@ export function mountEarth(root, store, { research, navigate }) {
     const checkins = received.filter(p => p.kind === 'checkin');
     const brief = store.state.briefText ?? checkupBrief(m, actions, t);
     return `<div class="qgrid">
-      <section class="panel"><h2>Physician review queue</h2><p class="sub">Evidence packets received on Earth that request a health check. Messages back travel on the next uplink (simulated). No message reaches a real person.</p>
+      <section class="panel"><h2>Health reviews: crew ↔ Earth physicians</h2><p class="sub"><b>For astronauts:</b> alerts that asked for a health check land here once Earth receives them; a physician's reply comes back to your watch.</p><p class="sub">Evidence packets received on Earth that request a health check. Messages back travel on the next uplink (simulated). No message reaches a real person.</p>
         ${[...byEp.values()].reverse().map(p => {
           const ep = m.alerts.episodes.find(e => e.episode_id === p.episode_id);
           const st = episodeStatus(ep, t, actions);
@@ -116,7 +116,7 @@ export function mountEarth(root, store, { research, navigate }) {
             <div class="row"><button class="btn small primary" data-review="${esc(ep.episode_id)}">Mark reviewed &amp; send message</button><button class="btn small" data-resolve="${esc(ep.episode_id)}">Resolve after review</button><button class="btn small" data-explain="ep:${esc(ep.episode_id)}">Explain</button></div></div>`;
         }).join('') || '<p class="sub">Nothing received that needs review yet.</p>'}
       </section>
-      <section class="panel"><h2>Research review queue</h2><p class="sub">Forecast-based items. No validated clinical cutoff exists for TERRA or forecast WBC; these never trigger treatment.</p>
+      <section class="panel"><h2>Research reviews (science team)</h2><p class="sub"><b>For astronauts:</b> these are questions for scientists, not medical alerts. At most they may ask for an extra sample at your next scheduled draw.</p><p class="sub">Forecast-based items. No validated clinical cutoff exists for TERRA or forecast WBC; these never trigger treatment.</p>
         ${research.reverse().map(e => {
           const rule = m.rules.find(r => r.id === e.rule_id);
           const req = actions.find(a => a.action === 'request_sample' && a.episode_id === e.episode_id);
@@ -125,10 +125,10 @@ export function mountEarth(root, store, { research, navigate }) {
         }).join('') || '<p class="sub">No research items yet.</p>'}
         <h3>Check-ins received</h3>${checkins.length ? checkins.reverse().map(p => `<div class="sub">${esc(missionLabel(m.schedule, p.created, true))}: ${esc(p.summary)}</div>`).join('') : '<p class="sub">None received.</p>'}
       </section>
-      <section class="panel brief" style="grid-column:1/-1"><h2>Medical check-up brief</h2><p class="sub">Generated from measured trends, symptoms, exposure history, unresolved alerts and suggested questions. Research predictions are labeled unconfirmed. Edit before use.</p>
+      <section class="panel brief" style="grid-column:1/-1"><h2>Check-up brief (shared by astronaut and flight physician)</h2><p class="sub">Generated from measured trends, symptoms, exposure history, unresolved alerts and suggested questions. Research predictions are labeled unconfirmed. Edit before use.</p>
         <textarea id="brief">${esc(brief)}</textarea>
         <div class="row"><button class="btn small primary" data-brief="save">Save edits</button><button class="btn small" data-brief="regen">Regenerate at current time</button><button class="btn small" data-brief="export">Export .txt</button>${store.state.briefEditedAt ? `<span class="sub">Edited ${esc(store.state.briefEditedAt)}</span>` : ''}</div></section>
-      <section class="panel" style="grid-column:1/-1"><h2>Packet log</h2><div style="max-height:260px;overflow:auto"><table><thead><tr><th>Created</th><th>Kind</th><th>Summary</th><th>Status</th></tr></thead><tbody>
+      <section class="panel" style="grid-column:1/-1"><h2>Messages between spacecraft and Earth (packet log)</h2><div style="max-height:260px;overflow:auto"><table><thead><tr><th>Created</th><th>Kind</th><th>Summary</th><th>Status</th></tr></thead><tbody>
         ${store.packets.filter(p => p.created <= t && p.kind !== 'daily_summary').slice(-60).reverse().map(p => `<tr><td>${esc(missionLabel(m.schedule, p.created, true))}</td><td>${esc(p.kind)}</td><td>${esc(p.summary)}</td><td>${esc(packetStatus(p, t))}</td></tr>`).join('')}</tbody></table></div></section></div>`;
   }
 
@@ -149,7 +149,7 @@ export function mountEarth(root, store, { research, navigate }) {
     const sc = store.state.scenario;
     const m = store.model;
     const f = (k, label, v, type = 'number', step = '1') => `<label>${esc(label)}<input data-sk="${k}" type="${type}" step="${step}" value="${esc(v ?? '')}"></label>`;
-    return `<section class="panel"><h2>One editable mission schedule</h2><p class="sub">Phase (timeline position) and exposure region (trajectory) are separate. Regions come only from these trajectory settings — never inferred from TERRA or HRV.</p>
+    return `<section class="panel"><h2>Mission schedule (crew &amp; ground)</h2><p class="sub">Phase (timeline position) and exposure region (trajectory) are separate. Regions come only from these trajectory settings — never inferred from TERRA or HRV.</p>
       <div class="form-grid" style="margin-top:10px">
         ${f('launch_utc', 'Launch (UTC, ISO 8601)', sc.launch_utc, 'text')}${f('mission_days', 'Mission duration (days)', sc.mission_days)}
         ${f('exit_day', 'Magnetosphere exit (flight day; blank = none)', sc.exit_day, 'number', '0.25')}${f('reentry_day', 'Magnetosphere re-entry (flight day)', sc.reentry_day, 'number', '0.25')}
@@ -158,7 +158,7 @@ export function mountEarth(root, store, { research, navigate }) {
         ${f('baseline_window_days.0', 'Baseline window start (days rel. launch)', sc.baseline_window_days[0])}${f('baseline_window_days.1', 'Baseline window end', sc.baseline_window_days[1])}
         ${f('stress.onset_days_before_launch', 'Modeled stress onset (days before launch)', sc.stress.onset_days_before_launch)}
       </div><div class="row" style="margin-top:10px"><button class="btn primary" data-sched="apply">Apply schedule</button><span id="sched-err" class="notice err" hidden></span></div></section>
-      <section class="panel"><h2>Derived timeline</h2><table><thead><tr><th>Item</th><th>UTC</th><th>Notation</th></tr></thead><tbody>
+      <section class="panel"><h2>Mission timeline at a glance: phases, regions, blood draws and when results arrive</h2><table><thead><tr><th>Item</th><th>UTC</th><th>Notation</th></tr></thead><tbody>
         <tr><td>Launch</td><td>${esc(iso(m.schedule.launch))}</td><td>FD0</td></tr>
         ${m.schedule.regionChanges.filter(c => isNum(c.t)).map(c => `<tr><td>${esc(c.label)} → ${esc(REGION_LABEL[c.region])}</td><td>${esc(iso(c.t))}</td><td>${esc(missionLabel(m.schedule, c.t, true))}</td></tr>`).join('')}
         ${m.schedule.phases.map(p => `<tr><td>Phase: ${esc(PHASE_LABEL[p.phase])}</td><td>${esc(iso(p.start).slice(0, 16))} → ${esc(iso(p.end).slice(0, 16))}</td><td>${esc(missionLabel(m.schedule, p.start))} → ${esc(missionLabel(m.schedule, p.end))}</td></tr>`).join('')}
@@ -171,13 +171,13 @@ export function mountEarth(root, store, { research, navigate }) {
   function dataHtml() {
     const m = store.model;
     const fields = (name, list) => `<p><b>${name}</b>: ${list.map(x => `<code>${x}</code>`).join(' ')}</p>`;
-    return `<section class="panel"><h2>Alert rule registry <span class="chip">${RULESET_VERSION}</span></h2><p class="sub">Thresholds are labeled by kind. Edit demo values; operational limits must come from approved policy.</p>
+    return `<section class="panel"><h2>Alert rules: what makes the watch alert <span class="chip">${RULESET_VERSION}</span></h2><p class="sub">Thresholds are labeled by kind. Edit demo values; operational limits must come from approved policy.</p>
       <div style="overflow-x:auto"><table><thead><tr><th>Rule</th><th>Category · metric</th><th>Levels (severity: threshold)</th><th>Persistence</th><th>Kind / policy</th><th>Escalation</th></tr></thead><tbody>
       ${m.rules.map((r, i) => `<tr><td><b>${esc(r.label)}</b><br><code>${esc(r.id)} v${r.version}</code></td><td>${esc(r.category)} · ${esc(r.metric)} (${esc(r.unit)})</td>
         <td>${r.levels.map((l, k) => `${esc(l.severity)}: ${isNum(l.threshold) ? `<input style="width:70px" type="number" step="any" value="${l.threshold}" data-rule="${i}" data-level="${k}">` : '—'}`).join('<br>')}</td>
         <td>${isNum(r.persistence_h) ? r.persistence_h + ' h' : '—'}${isNum(r.cooldown_h) ? ` · cooldown ${r.cooldown_h} h` : ''}</td><td>${esc(r.threshold_kind)}<br><span class="sub">${esc(r.source_policy)}</span></td><td class="sub">${esc(r.escalation_route)}</td></tr>`).join('')}
       </tbody></table></div><div class="row" style="margin-top:8px"><button class="btn small primary" data-rules="apply">Apply edited thresholds</button><button class="btn small" data-rules="defaults">Restore defaults</button></div></section>
-      <section class="panel"><h2>Record contract</h2><p class="sub">TERRA <code>schema_version</code> is fixed to <code>aerol.terra.v1</code>. Missing values are <code>null</code>, never 0. <code>value_origin</code> ∈ ${VALUE_ORIGINS.map(v => `<code>${v}</code>`).join(' | ')}. Fold change = normalized value ÷ matched personal baseline; percent = 100 × (fold − 1); baseline is 1.0× = 0%.</p>
+      <section class="panel"><h2>Data record format</h2><p class="sub">TERRA <code>schema_version</code> is fixed to <code>aerol.terra.v1</code>. Missing values are <code>null</code>, never 0. <code>value_origin</code> ∈ ${VALUE_ORIGINS.map(v => `<code>${v}</code>`).join(' | ')}. Fold change = normalized value ÷ matched personal baseline; percent = 100 × (fold − 1); baseline is 1.0× = 0%.</p>
         ${fields('Shared', SHARED_FIELDS)}${fields('aerol.terra.v1', TERRA_FIELDS)}${fields('aerol.wbc.v1', WBC_FIELDS)}${fields('aerol.radiation.v1', RADIATION_FIELDS)}${fields('aerol.event.v1', EVENT_FIELDS)}</section>
       <section class="panel"><h2>Validate / import records</h2><p class="sub">Paste a JSON array of records (or a workspace export). Validation runs locally; the same rules run in the Python API (<code>POST /api/records/validate</code>).</p>
         <textarea id="import-box" style="width:100%;min-height:120px" placeholder='[{"schema_version":"aerol.terra.v1", ...}]'></textarea>
@@ -194,7 +194,7 @@ export function mountEarth(root, store, { research, navigate }) {
     const checks = workedChecks();
     const reg = m.registry;
     return `<div class="qgrid">
-      <section class="panel"><h2>Models</h2>
+      <section class="panel"><h2>How the projections work</h2><p class="sub"><b>For astronauts:</b> these are hand-set what-if models, not predictions of your health.</p>
         ${['terra', 'wbc'].map(k => `<h3>${esc(reg[k].model_id)} v${esc(reg[k].model_version)} <span class="chip sim">${esc(reg[k].mode)}</span></h3><p class="sub">${esc(reg[k].training_status)}. ${esc(reg[k].validation_status)}. ${esc(reg[k].coverage_note)}</p>`).join('')}
         <pre>TERRA fold F(t) = max(0, 1 + S(t) + R(t) + L(t))
 S stress (hypothesis): A·smoothstep before launch, A·exp(−Δt/τs) after
@@ -208,12 +208,12 @@ WBC W(t) = W0·(1 + s_w·Ŝ + F_flight + k_w·r̄ + L_w), W0=${sc.wbc.baseline} 
 Outputs clamped at 0 (count of clamped points: ${m.terra.clamped}).</pre>
         <h3>Learned mode <span class="chip">unavailable</span></h3><p class="sub">${esc(reg.learned.reason)}</p><ul class="sub">${reg.learned.requirements.map(r => `<li>${esc(r)}</li>`).join('')}</ul>
         <p class="sub">No error metrics are shown because none have been measured. Beyond-magnetosphere outputs are extrapolations of assumptions.</p></section>
-      <section class="panel"><h2>Radiation arithmetic</h2><p class="sub">r(t) = dD/dt; D(t+Δt) = D(t) + r·Δt_days, integrated over real elapsed time and split at every exposure transition. Cumulative dose plateaus after landing and never falls.</p>
+      <section class="panel"><h2>How radiation dose is counted</h2><p class="sub">r(t) = dD/dt; D(t+Δt) = D(t) + r·Δt_days, integrated over real elapsed time and split at every exposure transition. Cumulative dose plateaus after landing and never falls.</p>
         <table><tbody>${checks.map(c => `<tr><td>${esc(c.description)}</td><td>${esc(c.working)}</td><td class="${c.pass ? 'ok' : 'bad'}">${c.pass ? '✓' : '✗'} ${c.computed} mSv</td></tr>`).join('')}</tbody></table>
         <h3>Dose quantities</h3>${Object.values(QUANTITIES).map(q => `<p class="sub"><b>${esc(q.label)}</b> — ${esc(q.note)}</p>`).join('')}
         <p class="sub">The 1.84 mSv/day preset is a historical cruise reference, not a safety threshold. The NASA 600 mSv career limit is NASA effective dose and is not compared directly with scenario dose-equivalent totals.</p>
         <p class="sub">The combined report's 340-day constant-rate total (625.60 mSv) and its 6-month biological projection (≈335 mSv) use different durations and are kept separate.</p></section>
-      <section class="panel" style="grid-column:1/-1"><h2>Sources & verification status</h2><table><thead><tr><th>Source</th><th>Status</th><th>Use & limits</th></tr></thead><tbody>
+      <section class="panel" style="grid-column:1/-1"><h2>Where the data come from (sources &amp; verification)</h2><table><thead><tr><th>Source</th><th>Status</th><th>Use & limits</th></tr></thead><tbody>
         ${(research?.sources || []).map(s => `<tr><td>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a>` : esc(s.title)}</td><td><span class="chip">${esc(s.status)}</span>${s.checked ? `<br><span class="sub">checked ${esc(s.checked)}</span>` : ''}</td><td class="sub">${esc(s.note)}${s.sha256 ? `<br>SHA-256 ${esc(s.sha256.slice(0, 16))}…` : ''}</td></tr>`).join('')}
       </tbody></table><p class="sub">No NASA endorsement is implied. Synthetic identities only (${esc(sc.astronaut_id)}).</p></section></div>`;
   }

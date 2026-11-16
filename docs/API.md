@@ -21,7 +21,7 @@ Dates are ISO 8601. A collection timestamp includes `Z` or a UTC offset.
 | POST / GET | /api/records | Store validated records in SQLite (422 if any record is invalid) / list stored records |
 | POST | /api/radiation/integrate | Integrate dosimeter readings `{"readings":[{t, device_id, kind, value, unit}], "transitions":[t...]}` → total, increments, gaps, resets, duplicates, worked checks |
 
-Static routes: `/` (watch), `/earth/` (Earth dashboard), `/mobile/` (watch only), `/data/research.json`.
+Static routes: `/` (watch), `/dashboard/` (dashboard; `/earth/` still works), `/mobile/` (watch only), `/data/research.json`.
 
 Example reading:
 

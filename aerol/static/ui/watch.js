@@ -173,7 +173,7 @@ export function mountWatchPage(root, store, { navigate, watchOnly = false }) {
         <dt>Dose rate</dt><dd>${fmt(w.rate, 2)} mSv/day · total ${fmt(w.dose, 1)} mSv</dd>
         <dt>Earth link</dt><dd>${w.linkUp ? 'up' : 'unavailable'} (simulated) · ${queued.length} packet(s) queued onboard</dd>
         <dt>Scenario</dt><dd>${esc(m.scenario.name)}</dd></dl>
-        <div class="row" style="margin-top:10px"><button class="btn" data-nav-earth>Open Earth dashboard →</button></div>
+        <div class="row" style="margin-top:10px"><button class="btn" data-nav-earth>Open dashboard →</button></div>
       </section>
       <section class="panel"><h2>Evidence packets</h2><p class="sub">Alerts and check-ins leave the watch as packets. Delivery depends on the simulated link; the ground view is stale until they arrive.</p>
         <div class="loglist">${recent.length ? recent.map(p => `<div><span>${esc(missionLabel(m.schedule, p.created, true))} · ${esc(p.summary)}</span><span class="sub">${esc(packetStatus(p, t))}</span></div>`).join('') : '<span class="sub">No packets yet.</span>'}</div>

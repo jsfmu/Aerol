@@ -1,4 +1,4 @@
-// One shared store + simulation clock. The watch and the Earth dashboard both read from here,
+// One shared store + simulation clock. The watch and the dashboard both read from here,
 // so they cannot disagree; the ground view is explicitly delayed via simulated packets.
 import { DAY, HOUR, MINUTE, isNum, iso, fmt, signed, sampleGrid, round } from './util.js';
 import { buildSchedule, scenarioFromPreset, regionAt, phaseAt, missionLabel, validateScenario, REGION_LABEL, PHASE_LABEL } from './schedule.js';
@@ -213,6 +213,7 @@ export class Store {
       const s = JSON.parse(raw);
       if (s.version !== 2 || validateScenario(s.scenario).length) return null;
       s.clock.playing = false;
+      if (s.scenario?.astronaut_id === 'SYN-A01') s.scenario.astronaut_id = 'Astronaut 1'; // migrate saved workspaces
       return { ...defaultState(), ...s };
     } catch { return null; }
   }

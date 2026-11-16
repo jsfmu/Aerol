@@ -1,4 +1,4 @@
-// Entry point: one store, one clock, two experiences (watch / Earth dashboard).
+// Entry point: one store, one clock, two experiences (watch / dashboard).
 import { Store, linkUp } from '../core/store.js';
 import { missionLabel } from '../core/schedule.js';
 import { $, $$, esc, toast } from './dom.js';
@@ -13,7 +13,7 @@ let earth = null;
 
 function routeFromPath() {
   const p = location.pathname;
-  if (p.startsWith('/earth')) return 'earth';
+  if (p.startsWith('/dashboard') || p.startsWith('/earth')) return 'earth';
   if (p.startsWith('/mobile')) return 'watch-only';
   return 'watch';
 }
@@ -21,7 +21,7 @@ function routeFromPath() {
 let route = routeFromPath();
 
 function navigate(to, args = {}) {
-  const path = to === 'earth' ? '/earth/' : '/';
+  const path = to === 'earth' ? '/dashboard/' : '/';
   if (location.pathname !== path) history.pushState({}, '', path);
   route = to;
   show(args);
@@ -39,7 +39,7 @@ function show(args = {}) {
   } else if (!watch) {
     watch = mountWatchPage($('#watch-app'), store, { navigate, watchOnly: route === 'watch-only' });
   } else watch.render();
-  document.title = isEarth ? 'AEROL · Earth dashboard' : 'AEROL · Astronaut watch';
+  document.title = isEarth ? 'AEROL · Dashboard' : 'AEROL · Astronaut watch';
 }
 
 function renderStatus() {

@@ -23,7 +23,7 @@ export const DEFAULT_SCENARIO = Object.freeze({
   name: 'Hypothesis-driven mission simulation',
   description: 'Hypothetical 180-day cislunar mission (synthetic astronaut). Demonstration preset, not a learned model outcome and not an actual mission trajectory.',
   seed: 20310303,
-  astronaut_id: 'SYN-A01',
+  astronaut_id: 'Astronaut 1',
   mission_id: 'SIM-CISLUNAR-180',
   launch_utc: '2031-03-03T14:00:00Z',
   mission_days: 180,
