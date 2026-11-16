@@ -1,4 +1,4 @@
-# Demo walkthrough
+# Demo script (for the video)
 
 Start `python3 -m aerol` and open http://127.0.0.1:8000/. Optional: open http://127.0.0.1:8000/dashboard/
 in a second window — both follow the same clock.

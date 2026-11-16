@@ -16,16 +16,16 @@ python3 -m aerol            # Python 3.9+; no third-party packages
 
 | URL | Experience |
 |---|---|
-| http://127.0.0.1:8000/ | **Astronaut watch** simulator + demo walkthrough |
+| http://127.0.0.1:8000/ | **Astronaut watch** simulator |
 | http://127.0.0.1:8000/dashboard/ | **Dashboard** — “View as” **crew member** (onboard, plain language, own data, no link delay) or **Earth physician & research team** (delayed ground view, review queues, research tools) |
 | http://127.0.0.1:8000/mobile/ | Watch only (phone layout) |
 
 Both experiences share one store and one simulation clock (synced across tabs), so the watch and
 the dashboard never disagree. The ground view is deliberately delayed by simulated packets.
 
-## Demo walkthrough (≈3 minutes)
+## Demo script for the video (≈3 minutes)
 
-Use the **Demo walkthrough** panel on the watch page:
+Drive these moments with the timeline bar (drag, ⏭ next event, ▶ play) and the watch:
 
 1. **Watch status** — FD18, inside the magnetosphere; Home shows mission time, recovery estimate, status, top action.
 2. **Mission progression** — the shared clock plays; it auto-pauses when a new alert fires.

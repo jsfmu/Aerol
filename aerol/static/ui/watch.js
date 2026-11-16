@@ -150,9 +150,8 @@ export function mountWatchPage(root, store, { navigate, watchOnly = false }) {
   crown.addEventListener('wheel', e => { e.preventDefault(); go(ui.page + (e.deltaY > 0 ? 1 : -1)); }, { passive: false });
   $('#w-side', root).addEventListener('click', () => { ui.overlay = null; renderOverlay(); goto('alerts'); });
 
-  // ---- demo walkthrough ----
+  // ---- side panel ----
   function renderDemo() {
-    const STEPS = demoSteps(store);
     const host = $('#demo', root);
     if (!host) return;
     const m = store.model;
@@ -164,9 +163,6 @@ export function mountWatchPage(root, store, { navigate, watchOnly = false }) {
       <section class="panel pitch">
         <h1>A watch that helps astronauts recognize changes, receive exposure alerts, and know when to get checked.</h1>
         <p>Connected to TERRA, white-blood-cell and ionizing-radiation research tools on Earth. Every value here is labeled as simulated, measured, or predicted.</p>
-      </section>
-      <section class="panel"><h2>Demo walkthrough</h2><p class="sub">Each step moves the shared mission clock; the watch, Earth charts and alerts stay in sync.</p>
-        <ol class="steps">${STEPS.map((s, i) => `<li class="${ui.step === i ? 'active' : ''}"><div><b>${esc(s.title)}</b><p>${esc(s.caption)}</p></div><button class="btn small ${ui.step === i ? 'primary' : ''}" data-step="${i}">Go</button></li>`).join('')}</ol>
       </section>
       <section class="panel"><h2>Now</h2>
         <dl class="kv"><dt>Mission time</dt><dd>${esc(missionLabel(m.schedule, t, true))}</dd><dt>Phase</dt><dd>${esc(PHASE_LABEL[w.phase])}</dd><dt>Exposure region</dt><dd>${esc(REGION_LABEL[w.region])} <span class="sub">(trajectory setting)</span></dd>
@@ -182,23 +178,8 @@ export function mountWatchPage(root, store, { navigate, watchOnly = false }) {
   }
 
   root.addEventListener('click', e => {
-    const s = e.target.closest('[data-step]');
-    if (s) { runStep(Number(s.dataset.step)); return; }
     if (e.target.closest('[data-nav-earth]')) navigate('earth');
   });
-
-  function runStep(i) {
-    const s = demoSteps(store)[i];
-    ui.step = i;
-    store.play(false);
-    store.setTime(s.t);
-    if (s.page) goto(s.page);
-    ui.overlay = s.open ? s.open : null;
-    if (s.open) haptic(store.model.alerts.notifications.find(n => n.episode_id === s.open)?.severity);
-    if (s.play) { store.setSpeed(s.play); store.play(true); }
-    if (s.route) navigate(s.route, s.routeArgs);
-    render();
-  }
 
   // When the clock passes a new alert during playback, buzz and open it.
   function onFired(n) {
@@ -211,34 +192,9 @@ export function mountWatchPage(root, store, { navigate, watchOnly = false }) {
   store.subscribe(() => renderThrottled());
   go(0);
   render();
-  return { onFired, render, runStep, goto };
+  return { onFired, render, goto };
 }
 
 function freshDraft(episode_id = null) {
   return { symptoms: new Set(), stress: null, fatigue: null, concern: null, episode_id };
 }
-
-// Walkthrough: watch status → mission progression → exposure change → actionable watch alert →
-// health-check workflow → Earth research review → landing and recovery.
-export function demoSteps(store) {
-  const m = store.model;
-  const S = m.schedule;
-  const ep = id => m.alerts.episodes.find(e => e.rule_id === id && e.start >= S.launch);
-  const jump = ep('rad_rate_jump');
-  const rhr = m.alerts.episodes.find(e => e.rule_id === 'phys_rhr_sustained' && e.start > S.launch + 60 * DAY && e.start < S.landing);
-  const escT = rhr ? rhr.severity_history[rhr.severity_history.length - 1].t : S.launch + 97 * DAY;
-  const outage = m.scenario.link.outages?.[0];
-  const outEnd = outage ? S.launch + outage.end_day * DAY : escT + DAY;
-  const beltStart = S.regionChanges.find(c => c.region === 'radiation_belt_transit')?.t ?? S.launch + 28 * DAY;
-  return [
-    { title: 'Watch status', caption: 'Flight day 18, inside the magnetosphere. Home shows mission time, recovery estimate, status and the top action.', t: S.launch + 18 * DAY + 9 * HOUR, page: 'home' },
-    { title: 'Mission progression', caption: 'Play the shared clock at 12 h per second. It pauses automatically when a new alert fires.', t: S.launch + 26 * DAY, page: 'radiation', play: 12 * HOUR },
-    { title: 'Exposure change', caption: 'Explicit trajectory events: belt transit, then magnetosphere exit. Dose rate steps from 0.7 to 1.84 mSv/day; biology does not jump instantly.', t: beltStart + 2 * HOUR, page: 'radiation' },
-    { title: 'Actionable watch alert', caption: 'The alert states what changed, the reading, threshold, status and one next action.', t: (jump?.start ?? beltStart) + 3 * HOUR, page: 'home', open: jump?.episode_id },
-    { title: 'Health-check workflow', caption: 'A sustained resting-HR rise escalates to Caution during a communication outage. Record symptoms, begin follow-up, contact onboard crew medical support.', t: escT + HOUR, page: 'home', open: rhr?.episode_id },
-    { title: 'Earth research review', caption: 'After the outage, queued packets reach the (simulated) ground. Physicians review and message back; researchers check TERRA/WBC projections.', t: outEnd + 3 * HOUR, route: 'earth', routeArgs: { section: 'review' } },
-    { title: 'Landing and recovery', caption: 'Dose plateaus at landing, the R+0 WBC result arrives (measured, simulated), and TERRA projections relax toward 1.0×.', t: S.landing + 1.3 * DAY, page: 'followup' },
-  ];
-}
-
-export { SEVERITY_LABEL, actionSummary };

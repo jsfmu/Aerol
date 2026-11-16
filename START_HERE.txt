@@ -2,7 +2,7 @@ AEROL — ASTRONAUT WATCH + EARTH RESEARCH DASHBOARD
 
 1. Install Python 3.9 or newer (no extra packages needed).
 2. In this folder run:   python3 -m aerol
-3. Open http://127.0.0.1:8000/        (astronaut watch + demo walkthrough)
+3. Open http://127.0.0.1:8000/        (astronaut watch)
         http://127.0.0.1:8000/dashboard/  (Earth research dashboard)
         http://127.0.0.1:8000/mobile/ (watch only, phone)
 
