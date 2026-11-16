@@ -97,6 +97,7 @@ export function actionSummary(a) {
     case 'contact_cmo': return 'Crew medical support contacted (simulated, onboard)';
     case 'ground_review': return `Reviewed on Earth: ${a.data?.note || 'no note'}`;
     case 'request_sample': return 'Research confirmatory sample requested';
+    case 'selfcare': return `Self-care logged: ${a.data?.kind || 'activity'}`;
     case 'resolve': return 'Marked resolved by reviewer';
     default: return a.action;
   }

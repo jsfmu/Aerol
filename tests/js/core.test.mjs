@@ -236,3 +236,35 @@ test('bone-related functionality is absent', () => {
   }
   assert.ok(!defaultRules().some(r => /bone/i.test(r.id + r.metric)));
 });
+
+test('self-care gamification rewards habits, never vitals, and never touches alerts', async () => {
+  const { selfCareSummary, QUESTS } = await import('../../aerol/static/core/selfcare.js');
+  const t = at(100);
+  const base = selfCareSummary(model, [], t);
+  assert.ok(base.days.length > 100 && base.includesSimulatedHistory);
+  assert.ok(QUESTS.every(q => !/hr|hrv|wbc|terra|dose|spo2/i.test(q.id)), 'no physiological-outcome quests');
+  const ep = model.alerts.episodes.find(e => e.rule_id === 'phys_rhr_sustained' && e.start > at(90));
+  const acts = [
+    { action: 'checkin', t: ep.start + HOUR, episode_id: ep.episode_id, data: { symptoms: ['Unusual fatigue'] } },
+    { action: 'ack', t: ep.start + 30 * 60000, episode_id: ep.episode_id },
+    ...[1, 2, 3, 4].map(i => ({ action: 'selfcare', t: ep.start + i * HOUR, data: { kind: 'hydration' } })),
+  ];
+  const s = selfCareSummary(model, acts, ep.start + 5 * HOUR);
+  const earned = new Set(s.badges.filter(b => b.earned).map(b => b.id));
+  assert.ok(earned.has('speak_up') && earned.has('fast_ack'));
+  assert.ok(s.today.done.checkin && s.today.done.hydration);
+  // alerts are computed independently of self-care
+  const before = JSON.stringify(model.alerts.episodes.map(e => e.episode_id));
+  selfCareSummary(model, acts, at(150));
+  assert.equal(JSON.stringify(model.alerts.episodes.map(e => e.episode_id)), before);
+});
+
+test('self-care streak only scores finished days (no future data)', async () => {
+  const { selfCareDays, selfCareSummary } = await import('../../aerol/static/core/selfcare.js');
+  const t = at(60.6);
+  const days = selfCareDays(model, [], t);
+  assert.ok(days.every(d => d.t + DAY <= t));
+  const withAction = selfCareSummary(model, [{ action: 'selfcare', t, data: { kind: 'hydration' } }], t);
+  const without = selfCareSummary(model, [], t);
+  assert.equal(withAction.best, without.best, 'logging today never erases past streak days');
+});

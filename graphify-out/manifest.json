@@ -24,76 +24,58 @@
     "semantic_hash": "67f6ec3a1ed7f47354d8c793863d2388"
   },
   "aerol/server.py": {
-    "mtime": 1794734114.0,
-    "seen": 1794731182.000857,
-    "ast_hash": "87e40c2a8fb5a81ecd30334d22c249d8",
-    "semantic_hash": "87e40c2a8fb5a81ecd30334d22c249d8"
-  },
-  "aerol/static/app.js": {
-    "mtime": 1794734282.0,
-    "seen": 1794731182.000858,
-    "ast_hash": "72e1423643cb407ede0abdd6544f2011",
-    "semantic_hash": "72e1423643cb407ede0abdd6544f2011"
-  },
-  "aerol/static/data-snapshot.json": {
-    "mtime": 1794734114.0,
-    "seen": 1794731182.000858,
-    "ast_hash": "6acbd2b6b58eee17b57e793dc504d447",
-    "semantic_hash": "6acbd2b6b58eee17b57e793dc504d447"
+    "mtime": 1794779852.96364,
+    "seen": 1794791309.977924,
+    "ast_hash": "179028716e667c8b5ae3ef801eb73010",
+    "semantic_hash": "179028716e667c8b5ae3ef801eb73010"
   },
   "aerol/static/sw.js": {
-    "mtime": 1794734114.0,
-    "seen": 1794731182.0008588,
-    "ast_hash": "a4b7c3ea5875d5b90c4e9b459e2d86c6",
-    "semantic_hash": "a4b7c3ea5875d5b90c4e9b459e2d86c6"
+    "mtime": 1794779866.74708,
+    "seen": 1794791309.97793,
+    "ast_hash": "a626fae10ce8435ffc66a89018fefdd0",
+    "semantic_hash": "a626fae10ce8435ffc66a89018fefdd0"
   },
   "tests/test_api.py": {
-    "mtime": 1794734114.0,
-    "seen": 1794731182.0008588,
-    "ast_hash": "3c5ea4bad75791c3cbee8f9d149b3e41",
-    "semantic_hash": "3c5ea4bad75791c3cbee8f9d149b3e41"
+    "mtime": 1794780027.8738966,
+    "seen": 1794791309.9779358,
+    "ast_hash": "2e7de4dba1fae2f4936adf5b024354e2",
+    "semantic_hash": "2e7de4dba1fae2f4936adf5b024354e2"
   },
   "README.md": {
-    "mtime": 1794724649.373662,
-    "seen": 1794731182.0008588,
-    "ast_hash": "e53d3bba444409698bd1db10cc08d3d5",
-    "semantic_hash": "e53d3bba444409698bd1db10cc08d3d5"
+    "mtime": 1794780078.9553652,
+    "seen": 1794791309.977937,
+    "ast_hash": "0110a5c68f76001cc48a18171706cee0",
+    "semantic_hash": "0110a5c68f76001cc48a18171706cee0"
   },
   "START_HERE.txt": {
-    "mtime": 1794734488.0,
-    "seen": 1794731182.00086,
-    "ast_hash": "24dcf4b9fd472c370acd4ca0ba35d5e6",
-    "semantic_hash": "24dcf4b9fd472c370acd4ca0ba35d5e6"
+    "mtime": 1794780157.4645236,
+    "seen": 1794791309.977937,
+    "ast_hash": "a873c164f835e2357184d0d5e1004f71",
+    "semantic_hash": "a873c164f835e2357184d0d5e1004f71"
   },
   "aerol/static/index.html": {
-    "mtime": 1794734140.0,
-    "seen": 1794731182.00086,
-    "ast_hash": "2bc025c18bb234432d6f3f27cf2e8b80",
-    "semantic_hash": "2bc025c18bb234432d6f3f27cf2e8b80"
-  },
-  "aerol/static/mobile.html": {
-    "mtime": 1794734140.0,
-    "seen": 1794731182.000861,
-    "ast_hash": "c1fab454c9d9c15d60436651f97b5bab",
-    "semantic_hash": "c1fab454c9d9c15d60436651f97b5bab"
+    "mtime": 1794734828.0869362,
+    "seen": 1794791309.977938,
+    "ast_hash": "4f1488bd4c72638e5983b994b763c5ee",
+    "semantic_hash": "4f1488bd4c72638e5983b994b763c5ee"
   },
   "docs/API.md": {
-    "mtime": 1794734114.0,
-    "seen": 1794731182.000861,
-    "ast_hash": "61c0dfec255965237aca7886fbab94b0",
-    "semantic_hash": "61c0dfec255965237aca7886fbab94b0"
+    "mtime": 1794780157.4643276,
+    "seen": 1794791309.977938,
+    "ast_hash": "c1e2cd63aa801ff5509abb6bec4f3f30",
+    "semantic_hash": "c1e2cd63aa801ff5509abb6bec4f3f30"
   },
   "docs/DATA.md": {
-    "mtime": 1794734114.0,
-    "seen": 1794731182.000861,
-    "ast_hash": "b9529951317c97013f39e8589340af83",
-    "semantic_hash": "b9529951317c97013f39e8589340af83"
+    "mtime": 1794780143.9193344,
+    "seen": 1794791309.977939,
+    "ast_hash": "cfaffe4892adb6d0762174c55119169f",
+    "semantic_hash": "cfaffe4892adb6d0762174c55119169f"
   },
   "docs/MODEL_HANDOFF.md": {
-    "mtime": 1794734114.0,
-    "seen": 1794731182.000862,
-    "ast_hash": "86dfa0d29232dee7f54a987a3df3daf0",
-    "semantic_hash": "86dfa0d29232dee7f54a987a3df3daf0"
+    "mtime": 1794780157.4646995,
+    "seen": 1794791309.97794,
+    "ast_hash": "b4c50eaeeef6091ef6db53999c6e2cb6",
+    "semantic_hash": "b4c50eaeeef6091ef6db53999c6e2cb6"
   },
   "aerol/static/icons/icon-192.png": {
     "mtime": 1794734020.0,
@@ -124,5 +106,191 @@
     "seen": 1794731182.000863,
     "ast_hash": "e689b64640565de5ceb60f8007876288",
     "semantic_hash": "e689b64640565de5ceb60f8007876288"
+  },
+  "aerol/radiation.py": {
+    "mtime": 1794779835.410403,
+    "seen": 1794791309.977922,
+    "ast_hash": "65f2829ce0881241e7b32e745fa2eb2d",
+    "semantic_hash": "65f2829ce0881241e7b32e745fa2eb2d"
+  },
+  "aerol/schema.py": {
+    "mtime": 1794733499.4260828,
+    "seen": 1794791309.9779232,
+    "ast_hash": "d04afe31a6c06d2e5a0970c7f90b1f6f",
+    "semantic_hash": "d04afe31a6c06d2e5a0970c7f90b1f6f"
+  },
+  "aerol/static/core/events.js": {
+    "mtime": 1794734595.8087394,
+    "seen": 1794791309.977925,
+    "ast_hash": "526c8ed63c92c288ee514c38f7833338",
+    "semantic_hash": "526c8ed63c92c288ee514c38f7833338"
+  },
+  "aerol/static/core/export.js": {
+    "mtime": 1794779712.4962227,
+    "seen": 1794791309.977925,
+    "ast_hash": "83601314ca769bda1febba4f8875f117",
+    "semantic_hash": "83601314ca769bda1febba4f8875f117"
+  },
+  "aerol/static/core/models.js": {
+    "mtime": 1794732712.15531,
+    "seen": 1794791309.9779258,
+    "ast_hash": "c597b7ed0910b4bddfda03c9fbf506b3",
+    "semantic_hash": "c597b7ed0910b4bddfda03c9fbf506b3"
+  },
+  "aerol/static/core/radiation.js": {
+    "mtime": 1794734595.8086388,
+    "seen": 1794791309.9779258,
+    "ast_hash": "8847be447adb54850388362fee4ce96e",
+    "semantic_hash": "8847be447adb54850388362fee4ce96e"
+  },
+  "aerol/static/core/research.js": {
+    "mtime": 1794734815.835777,
+    "seen": 1794791309.977927,
+    "ast_hash": "a02cf10e2349bfaf3c17a5b512f6416a",
+    "semantic_hash": "a02cf10e2349bfaf3c17a5b512f6416a"
+  },
+  "aerol/static/core/rules.js": {
+    "mtime": 1794734595.8083344,
+    "seen": 1794791309.977927,
+    "ast_hash": "78a0d46ef15b0195d0046f778ea74c8d",
+    "semantic_hash": "78a0d46ef15b0195d0046f778ea74c8d"
+  },
+  "aerol/static/core/schedule.js": {
+    "mtime": 1794734595.807882,
+    "seen": 1794791309.977928,
+    "ast_hash": "d4170daa922073b278bc8d9c83b14b2a",
+    "semantic_hash": "d4170daa922073b278bc8d9c83b14b2a"
+  },
+  "aerol/static/core/schema.js": {
+    "mtime": 1794733499.426236,
+    "seen": 1794791309.977928,
+    "ast_hash": "78472847cd35cb8240850e501fa57136",
+    "semantic_hash": "78472847cd35cb8240850e501fa57136"
+  },
+  "aerol/static/core/store.js": {
+    "mtime": 1794780190.5409205,
+    "seen": 1794791309.9779289,
+    "ast_hash": "73faae4c26caa05c147f97e4de1de7c0",
+    "semantic_hash": "73faae4c26caa05c147f97e4de1de7c0"
+  },
+  "aerol/static/core/util.js": {
+    "mtime": 1794732429.7786493,
+    "seen": 1794791309.9779289,
+    "ast_hash": "8bf49058dbda4ed3ba333e1a2fc6f0c6",
+    "semantic_hash": "8bf49058dbda4ed3ba333e1a2fc6f0c6"
+  },
+  "aerol/static/core/vitals.js": {
+    "mtime": 1794734595.808125,
+    "seen": 1794791309.9779289,
+    "ast_hash": "b91e7d4da485fb7ee5ebb36114518bb1",
+    "semantic_hash": "b91e7d4da485fb7ee5ebb36114518bb1"
+  },
+  "aerol/static/data/research.json": {
+    "mtime": 1794733511.4651842,
+    "seen": 1794791309.97793,
+    "ast_hash": "c89604db4cb3800f54e540409a253cd5",
+    "semantic_hash": "c89604db4cb3800f54e540409a253cd5"
+  },
+  "aerol/static/ui/charts.js": {
+    "mtime": 1794780006.5961063,
+    "seen": 1794791309.977931,
+    "ast_hash": "19231362c98c73930e208ddb4038d424",
+    "semantic_hash": "19231362c98c73930e208ddb4038d424"
+  },
+  "aerol/static/ui/dom.js": {
+    "mtime": 1794738370.5455194,
+    "seen": 1794791309.977931,
+    "ast_hash": "b9fa8bc984fb990604578536e540b26d",
+    "semantic_hash": "b9fa8bc984fb990604578536e540b26d"
+  },
+  "aerol/static/ui/earth-observed.js": {
+    "mtime": 1794779712.414606,
+    "seen": 1794791309.977931,
+    "ast_hash": "ec0cdd0bd01757c16aa40729095506eb",
+    "semantic_hash": "ec0cdd0bd01757c16aa40729095506eb"
+  },
+  "aerol/static/ui/earth-timeline.js": {
+    "mtime": 1794780190.540663,
+    "seen": 1794791309.977932,
+    "ast_hash": "58220292335ed370bde199aaa8db8732",
+    "semantic_hash": "58220292335ed370bde199aaa8db8732"
+  },
+  "aerol/static/ui/earth.js": {
+    "mtime": 1794779811.9081461,
+    "seen": 1794791309.977932,
+    "ast_hash": "60626016764b5a31f4be95a4fc0de521",
+    "semantic_hash": "60626016764b5a31f4be95a4fc0de521"
+  },
+  "aerol/static/ui/main.js": {
+    "mtime": 1794779866.7518823,
+    "seen": 1794791309.9779332,
+    "ast_hash": "b55981dd722d98b9b2a4a76f60c59be6",
+    "semantic_hash": "b55981dd722d98b9b2a4a76f60c59be6"
+  },
+  "aerol/static/ui/transport.js": {
+    "mtime": 1794738371.317757,
+    "seen": 1794791309.9779332,
+    "ast_hash": "2f488cf51413b33b9c6ac57ae202678b",
+    "semantic_hash": "2f488cf51413b33b9c6ac57ae202678b"
+  },
+  "aerol/static/ui/watch-screens.js": {
+    "mtime": 1794779932.1785047,
+    "seen": 1794791309.9779332,
+    "ast_hash": "fdedc61c01da3161eaf1b6677f140995",
+    "semantic_hash": "fdedc61c01da3161eaf1b6677f140995"
+  },
+  "aerol/static/ui/watch.js": {
+    "mtime": 1794779932.1786432,
+    "seen": 1794791309.9779341,
+    "ast_hash": "87a058382885f848d7caa316f6d63782",
+    "semantic_hash": "87a058382885f848d7caa316f6d63782"
+  },
+  "scripts/build_research_data.py": {
+    "mtime": 1794733511.4278812,
+    "seen": 1794791309.9779341,
+    "ast_hash": "30ca52e85412fa2597777b9fe51ab65c",
+    "semantic_hash": "30ca52e85412fa2597777b9fe51ab65c"
+  },
+  "scripts/make_fixtures.mjs": {
+    "mtime": 1794733726.8911862,
+    "seen": 1794791309.9779341,
+    "ast_hash": "15ccdca3b8163f67d8d1bb82a9cc8cce",
+    "semantic_hash": "15ccdca3b8163f67d8d1bb82a9cc8cce"
+  },
+  "tests/fixtures/records.json": {
+    "mtime": 1794733726.9751506,
+    "seen": 1794791309.977935,
+    "ast_hash": "a2a781fa2ed224a5f9a3990d82faf4cc",
+    "semantic_hash": "a2a781fa2ed224a5f9a3990d82faf4cc"
+  },
+  "tests/js/core.test.mjs": {
+    "mtime": 1794734595.8090756,
+    "seen": 1794791309.977935,
+    "ast_hash": "be84cf5768afe75bdbb2e4cdd8386c6c",
+    "semantic_hash": "be84cf5768afe75bdbb2e4cdd8386c6c"
+  },
+  "tests/test_schema_radiation.py": {
+    "mtime": 1794780027.8740125,
+    "seen": 1794791309.9779358,
+    "ast_hash": "3b080b547a8a22bde660bbc234eb96ec",
+    "semantic_hash": "3b080b547a8a22bde660bbc234eb96ec"
+  },
+  "docs/DEMO.md": {
+    "mtime": 1794780144.6941786,
+    "seen": 1794791309.977939,
+    "ast_hash": "cb7b307b14461f394ce207d9add2eda5",
+    "semantic_hash": "cb7b307b14461f394ce207d9add2eda5"
+  },
+  "docs/MODEL.md": {
+    "mtime": 1794780115.1999533,
+    "seen": 1794791309.97794,
+    "ast_hash": "d89dbb708be847988d0dbc20d76d9cd5",
+    "semantic_hash": "d89dbb708be847988d0dbc20d76d9cd5"
+  },
+  "docs/SCHEMA.md": {
+    "mtime": 1794780115.972171,
+    "seen": 1794791309.977941,
+    "ast_hash": "550d79f69d0edb665518ee66b88cf15e",
+    "semantic_hash": "550d79f69d0edb665518ee66b88cf15e"
   }
 }

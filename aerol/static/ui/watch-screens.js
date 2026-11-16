@@ -6,7 +6,7 @@ import { episodeStatus, SEVERITY_LABEL } from '../core/rules.js';
 import { esc } from './dom.js';
 
 export const PAGES = [
-  ['home', 'Home'], ['vitals', 'Vitals'], ['wellness', 'Sleep · Activity · Stress'], ['radiation', 'Radiation'],
+  ['home', 'Home'], ['selfcare', 'Self-care'], ['vitals', 'Vitals'], ['wellness', 'Sleep · Activity · Stress'], ['radiation', 'Radiation'],
   ['alerts', 'Notifications'], ['checkin', 'Check-in'], ['followup', 'Follow-up'],
 ];
 

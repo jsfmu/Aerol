@@ -243,6 +243,11 @@ export function mountTimeline(host, store, ctx) {
         <dt>WBC projection</dt><dd>mean ${fmt(s.wbcMean, 2)} ×10⁹/L</dd><dt>Alert episodes</dt><dd>${s.alerts}</dd><dt>Samples</dt><dd>${esc(s.samples.join(', ') || 'none')}</dd></dl>
         <div class="row" style="margin-top:8px"><button class="btn small" data-act="export-sel">Export CSV + JSON</button><button class="btn small" data-act="report-sel">Annotated report</button></div></section>`);
     }
+    if (ctx.audience === 'crew') {
+      parts.push(`<section class="panel"><h2>How to read these charts</h2><p class="sub">Dashed lines are <b>simulated projections</b> for the synthetic astronaut, not measurements. Diamonds are lab results, shown once the lab has reported them. TERRA at 0% means the same as your baseline. The shaded band shows how the projection changes when assumptions change. It is not a forecast of your health. Click any marker in the bottom strip for a plain-language explanation.</p></section>`);
+      $('#tl-side', host).innerHTML = parts.join('');
+      return;
+    }
     const steps = rateSteps(m.segments).filter(s => s.t >= m.schedule.launch && s.t < m.schedule.landing);
     parts.push(`<section class="panel"><h2>Lag inspector</h2><p class="sub">Time from each exposure step to the simulated TERRA response (vs a no-step counterfactual). Timestamps are never shifted.</p>
       <table><thead><tr><th>Step</th><th>Rate</th><th>Onset</th><th>50%</th></tr></thead><tbody>${steps.map(st => {

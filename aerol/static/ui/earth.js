@@ -1,4 +1,5 @@
-// Earth research dashboard (physicians & researchers). Dense controls live here, not on the watch.
+// Earth dashboard with two audiences: crew members (onboard, plain language, their own data)
+// and Earth physicians/researchers (delayed ground view, review tools). Same store, same clock.
 import { DAY, isNum, fmt, iso, signed } from '../core/util.js';
 import { missionLabel, PHASES, PHASE_LABEL, REGION_LABEL, validateScenario } from '../core/schedule.js';
 import { workedChecks, QUANTITIES } from '../core/radiation.js';
@@ -10,24 +11,39 @@ import { phaseComparison, dostelRows, dostelRecord } from '../core/research.js';
 import { simulationRecords } from '../core/export.js';
 import { mountTimeline } from './earth-timeline.js';
 import { mountObserved } from './earth-observed.js';
+import { CREW_SECTIONS, crewHome, crewFollowup, crewLearn, crewActions, selfcareDashboard } from './earth-crew.js';
 import { $, esc, toast, download, throttle, openDialog } from './dom.js';
 
-const SECTIONS = [['timeline', 'Mission timeline'], ['phases', 'Phase comparison'], ['review', 'Review queue'], ['events', 'Events & explanations'], ['schedule', 'Mission schedule'], ['data', 'Rules, schema & data'], ['sources', 'Model & sources']];
+const AUDIENCES = { crew: 'Crew member (onboard)', physician: 'Earth physician & research team' };
+const PHYS_SECTIONS = [['timeline', 'Mission timeline'], ['phases', 'Phase comparison'], ['review', 'Review queue'], ['events', 'Events & explanations'], ['schedule', 'Mission schedule'], ['data', 'Rules, schema & data'], ['sources', 'Model & sources']];
 
 export function mountEarth(root, store, { research, navigate }) {
-  const ui = { section: 'timeline', mode: 'simulation', timeline: null, observed: null, eventFilter: 'all' };
-  root.innerHTML = `<div class="earth"><nav class="enav" aria-label="Dashboard sections">${SECTIONS.map(([id, l]) => `<button data-sec="${id}">${esc(l)}</button>`).join('')}
-    <p class="nav-note">For physicians and researchers. TERRA and WBC require laboratory assays; the watch never measures them. Every series is labeled observed, digitized, model prediction or simulation.</p></nav>
+  let saved = null;
+  try { saved = localStorage.getItem('aerol.audience'); } catch { /* storage unavailable */ }
+  const ui = { audience: saved === 'crew' ? 'crew' : 'physician', section: saved === 'crew' ? 'crew-home' : 'timeline', mode: 'simulation', timeline: null, observed: null, eventFilter: 'all' };
+  const sections = () => (ui.audience === 'crew' ? CREW_SECTIONS : PHYS_SECTIONS);
+  root.innerHTML = `<div class="earth"><nav class="enav" aria-label="Dashboard sections"><div class="aud" role="group" aria-label="View as">
+    <span class="nav-label">View as</span>${Object.entries(AUDIENCES).map(([k, l]) => `<button class="aud-btn" data-aud="${k}">${esc(l)}</button>`).join('')}</div>
+    <div id="e-nav"></div><p class="nav-note" id="e-navnote"></p></nav>
     <div class="ebody"><div class="ehead"><div><h1 id="e-title"></h1><p class="sub" id="e-sub"></p></div><div id="e-mode"></div></div><div class="fresh" id="e-fresh"></div><div id="e-content"></div></div></div>`;
   const content = $('#e-content', root);
   const simRecords = () => simulationRecords(store.model);
 
+  function renderNav() {
+    $('#e-nav', root).innerHTML = sections().map(([id, l]) => `<button data-sec="${id}">${esc(l)}</button>`).join('');
+    root.querySelectorAll('[data-aud]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.aud === ui.audience)));
+    $('#e-navnote', root).textContent = ui.audience === 'crew'
+      ? 'Your own data, onboard and current. Physicians on Earth see the same records after the link delay.'
+      : 'For physicians and researchers. TERRA and WBC require laboratory assays; the watch never measures them. Every series is labeled observed, digitized, model prediction or simulation.';
+  }
+
   function renderHead() {
-    const [, title] = SECTIONS.find(s => s[0] === ui.section);
+    if (!sections().some(s => s[0] === ui.section)) ui.section = sections()[0][0];
+    const [, title] = sections().find(s => s[0] === ui.section);
     $('#e-title', root).textContent = title;
     $('#e-sub', root).textContent = `${store.model.scenario.name} · ${store.model.scenario.description}`;
     root.querySelectorAll('[data-sec]').forEach(b => b.setAttribute('aria-current', String(b.dataset.sec === ui.section)));
-    $('#e-mode', root).innerHTML = ui.section === 'timeline' ? `<div class="seg" role="group" aria-label="Data mode"><button data-mode="simulation" aria-pressed="${ui.mode === 'simulation'}">Hypothesis-driven simulation</button><button data-mode="observed" aria-pressed="${ui.mode === 'observed'}">Observed research</button></div>` : '';
+    $('#e-mode', root).innerHTML = ui.section === 'timeline' && ui.audience === 'physician' ? `<div class="seg" role="group" aria-label="Data mode"><button data-mode="simulation" aria-pressed="${ui.mode === 'simulation'}">Hypothesis-driven simulation</button><button data-mode="observed" aria-pressed="${ui.mode === 'observed'}">Observed research</button></div>` : '';
     renderFresh();
   }
 
@@ -36,13 +52,19 @@ export function mountEarth(root, store, { research, navigate }) {
     const g = store.groundView(t);
     const staleH = g.stalenessMs === null ? null : g.stalenessMs / 3600000;
     const el = $('#e-fresh', root);
+    if (ui.audience === 'crew') {
+      el.classList.remove('stale');
+      el.innerHTML = `<b>Onboard view</b><span>Your data are current at ${esc(missionLabel(store.model.schedule, t, true))}. Earth sees them ${staleH !== null ? fmt(staleH, 1) + ' h later' : 'after the link delay'}${g.queued.length ? ` · ${g.queued.length} packet(s) waiting to send` : ''}.</span><span class="chip">Synthetic astronaut ${esc(store.model.scenario.astronaut_id)}</span>`;
+      return;
+    }
     el.classList.toggle('stale', staleH !== null && staleH > 12);
     el.innerHTML = `<b>Ground view</b><span>Astronaut-originated data current through ${g.latestCreated ? esc(missionLabel(store.model.schedule, g.latestCreated, true)) : '—'}${staleH !== null ? ` (${fmt(staleH, 1)} h behind mission clock ${esc(missionLabel(store.model.schedule, t, true))})` : ''}</span>
       <span class="chip">${g.queued.length} packet(s) queued onboard</span><span class="sub">Simulated link; no real ground station.</span>`;
   }
 
   function show(args = {}) {
-    if (args.section) ui.section = args.section;
+    if (args.section) { if (!sections().some(x => x[0] === args.section)) ui.audience = 'physician'; ui.section = args.section; }
+    renderNav();
     renderHead();
     renderSection();
   }
@@ -51,9 +73,9 @@ export function mountEarth(root, store, { research, navigate }) {
     ui.timeline = null;
     if (ui.section === 'timeline') {
       content.innerHTML = '<div id="tl-host"></div>';
-      if (ui.mode === 'simulation') ui.timeline = mountTimeline($('#tl-host', root), store, { simulationRecords: simRecords });
+      if (ui.mode === 'simulation' || ui.audience === 'crew') ui.timeline = mountTimeline($('#tl-host', root), store, { simulationRecords: simRecords, audience: ui.audience });
       else ui.observed = mountObserved($('#tl-host', root), research);
-    } else content.innerHTML = { phases: phasesHtml, review: reviewHtml, events: eventsHtml, schedule: scheduleHtml, data: dataHtml, sources: sourcesHtml }[ui.section]();
+    } else content.innerHTML = { 'crew-home': () => crewHome(store), selfcare: () => selfcareDashboard(store, store.t), 'crew-followup': () => crewFollowup(store), 'crew-learn': crewLearn, phases: phasesHtml, review: reviewHtml, events: eventsHtml, schedule: scheduleHtml, data: dataHtml, sources: sourcesHtml }[ui.section]();
   }
 
   // ---------- Phase comparison ----------
@@ -198,6 +220,18 @@ Outputs clamped at 0 (count of clamped points: ${m.terra.clamped}).</pre>
 
   // ---------- events ----------
   root.addEventListener('click', e => {
+    const aud = e.target.closest('[data-aud]');
+    if (aud) {
+      ui.audience = aud.dataset.aud;
+      try { localStorage.setItem('aerol.audience', ui.audience); } catch { /* ignore */ }
+      ui.section = sections()[0][0];
+      show(); return;
+    }
+    if (crewActions(e, store, toast, renderSection)) return;
+    const scb = e.target.closest('[data-selfcare]');
+    if (scb) { store.addAction({ action: 'selfcare', data: { kind: scb.dataset.selfcare } }); toast('Self-care logged.'); renderSection(); return; }
+    const goCheck = e.target.closest('[data-sec-crew]');
+    if (goCheck) { ui.section = 'crew-followup'; show(); return; }
     const sec = e.target.closest('[data-sec]');
     if (sec) { ui.section = sec.dataset.sec; show(); return; }
     const mode = e.target.closest('[data-mode]');
@@ -312,7 +346,8 @@ Outputs clamped at 0 (count of clamped points: ${m.terra.clamped}).</pre>
   const onClock = throttle(() => {
     renderFresh();
     if (ui.timeline) ui.timeline.onClock();
-    if (ui.section === 'review' && !root.contains(document.activeElement?.closest?.('textarea') || null)) renderSection();
+    const typing = root.contains(document.activeElement?.closest?.('textarea, input') || null);
+    if (['review', 'crew-home', 'selfcare', 'crew-followup'].includes(ui.section) && !typing) renderSection();
   }, 250);
   store.subscribe(kind => {
     if (root.hidden) return;

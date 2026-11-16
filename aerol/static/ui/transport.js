@@ -5,6 +5,7 @@ import { $, esc, toast } from './dom.js';
 
 const SPEEDS = [
   [HOUR, '1 h/s'], [6 * HOUR, '6 h/s'], [12 * HOUR, '12 h/s'], [DAY, '1 day/s'], [3 * DAY, '3 days/s'], [7 * DAY, '1 week/s'],
+  [14 * DAY, '2 weeks/s'], [21 * DAY, '3 weeks/s'],
 ];
 const PRESET_LABELS = {
   'hypothesis-default': 'Hypothesis-driven mission (default)',

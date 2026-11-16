@@ -43,13 +43,15 @@ h1,h2,h3,h4,p{margin:0}
 .dot.down{background:#e2a34a}.dot.off{background:#e46b6b}
 
 /* transport */
-.transport{background:var(--panel);border-bottom:1px solid var(--line);padding:10px 20px;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;position:sticky;top:52px;z-index:15}
+.transport{background:var(--panel);border-bottom:1px solid var(--line);padding:10px 20px;display:grid;grid-template-columns:max-content minmax(0,1fr) max-content;gap:14px;align-items:center;position:sticky;top:52px;z-index:15}
 .tp-controls{display:flex;gap:6px;align-items:center}
 .tp-btn{border:1px solid var(--line-2);background:var(--panel-2);border-radius:8px;min-width:36px;height:34px;padding:0 10px;font-weight:600}
 .tp-btn.primary{background:var(--teal);color:var(--teal-ink);border-color:var(--teal)}
-.tp-time{display:grid;line-height:1.15;min-width:150px}
-.tp-time b{font-size:18px;font-variant-numeric:tabular-nums}
-.tp-time small{font-size:11px;color:var(--muted)}
+.tp-time{display:grid;line-height:1.15;width:260px;min-width:0}
+.tp-time b{font-size:18px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tp-time small{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tp-track{min-width:0;contain:layout}
+.tp-seg{text-overflow:clip}
 .tp-track{position:relative;height:46px;cursor:pointer;touch-action:none;user-select:none}
 .tp-rows{position:absolute;inset:0 0 8px 0;display:grid;grid-template-rows:1fr 1fr;gap:2px;border-radius:6px;overflow:hidden}
 .tp-row{position:relative}
@@ -285,7 +287,8 @@ pre{white-space:pre-wrap;background:var(--panel-2);border:1px solid var(--line);
   .earth{grid-template-columns:1fr}
   .enav{position:static;flex-direction:row;overflow-x:auto;max-height:none;border-right:0;border-bottom:1px solid var(--line);padding:6px}
   .enav button{white-space:nowrap}.enav .nav-note{display:none}
-  .transport{grid-template-columns:1fr;top:auto;position:relative}
+  .transport{grid-template-columns:minmax(0,1fr);top:auto;position:relative}
+  .tp-time{width:auto;flex:1}
   .appbar{position:relative}
   .ebody{padding:12px}
 }
@@ -299,3 +302,44 @@ body.watch-only .stage{border-radius:0;min-height:calc(100vh - 100px)}
 /* SVG fills for strip spans (same palette as the transport bar) */
 .tchart rect.seg-preflight{fill:var(--pre)}.tchart rect.seg-early_flight{fill:var(--early)}.tchart rect.seg-mid_flight{fill:var(--mid)}.tchart rect.seg-late_flight{fill:var(--late)}.tchart rect.seg-landing{fill:var(--landing)}.tchart rect.seg-after_return{fill:var(--after)}
 .tchart rect.seg-ground{fill:var(--ground)}.tchart rect.seg-inside_magnetosphere{fill:var(--inside)}.tchart rect.seg-radiation_belt_transit{fill:var(--belt)}.tchart rect.seg-beyond_magnetosphere{fill:var(--beyond)}.tchart rect.seg-unknown{fill:var(--unknown)}
+/* Audience switch */
+.aud{display:grid;gap:4px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.nav-label{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);padding:0 10px}
+.enav .aud-btn{font-size:12px;border:1px solid var(--line-2);background:var(--panel-2)}
+.enav .aud-btn[aria-pressed="true"]{background:var(--teal);color:var(--teal-ink);border-color:var(--teal)}
+.crew-cards{margin-bottom:14px}
+.msg{border-left:3px solid var(--teal);padding:4px 10px;margin:8px 0;background:var(--panel-2);border-radius:0 8px 8px 0}
+.msg p{font-size:13px}
+/* Self-care (watch) */
+.sc-hero{display:flex;gap:10px;align-items:center;margin:2px 0 6px}
+.sc-rings{position:relative;flex:0 0 auto}
+.sc-center{position:absolute;inset:0;display:grid;place-items:center;text-align:center;line-height:1.05}
+.sc-center b{font-size:17px}.sc-center small{display:block;font-size:9px;color:#a6c2bb;letter-spacing:.5px}
+.sc-hero.light .sc-center small{color:var(--muted)}
+.sc-meta{font-size:12px;flex:1;min-width:0;display:grid;gap:3px}
+.xpbar{height:7px;border-radius:5px;background:#3a2f1a;overflow:hidden}
+.xpbar i{display:block;height:100%;background:linear-gradient(90deg,#ffb547,#ffd27a);border-radius:5px}
+.wquest{display:grid;grid-template-columns:24px 1fr auto;gap:7px;align-items:center;width:100%;text-align:left;background:#151d1f;border:1px solid #ffffff14;border-radius:13px;padding:6px 9px;margin:4px 0;color:inherit;font:inherit}
+.wquest.done{border-color:#9be56466;background:#16241a}
+.wquest .qicon,.quest .qicon{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#ffffff14;font-size:12px}
+.wquest.done .qicon,.quest.done .qicon{background:#9be564;color:#0d1f05;font-weight:800}
+.wquest .qtext b{font-size:12px;display:block}.wquest .qtext small{font-size:9.5px;color:#9fb8b1}
+.wquest .qxp{font-size:10px;color:#ffb547;font-weight:700}
+.sc-badges{display:flex;gap:5px;flex-wrap:wrap}
+.sc-badge{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:#ffffff0d;filter:grayscale(1);opacity:.35;font-size:14px}
+.sc-badge.on{filter:none;opacity:1;background:#3a2f1a;box-shadow:0 0 0 1px #ffb54788}
+/* Self-care (dashboard) */
+.quests{display:grid;gap:6px;margin-top:8px}
+.quest{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;width:100%;text-align:left;border:1px solid var(--line);background:var(--panel-2);border-radius:10px;padding:8px 10px;font:inherit;color:inherit}
+button.quest:hover{border-color:var(--teal)}
+.quest.done{border-color:#5aa83a88}
+.quest .qtext b{display:block;font-size:13px}.quest .qtext small{font-size:11px;color:var(--muted)}
+.quest .qxp{font-weight:700;color:var(--amber)}
+.sc-heat{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;max-width:300px;margin:8px 0}
+.sc-heat span{aspect-ratio:1;border-radius:4px;background:var(--line)}
+.sc-heat .lvl1{background:#cfe9b8}.sc-heat .lvl2{background:#9fd77a}.sc-heat .lvl3{background:#6cbf45}.sc-heat .lvl4{background:#3f9a22}
+.sc-heat .met{box-shadow:inset 0 0 0 2px #ffb547}
+.sc-badge-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.sc-badge-card{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:8px;opacity:.5;filter:grayscale(1)}
+.sc-badge-card.on{opacity:1;filter:none;border-color:#ffb54799}
+.sc-badge-card span{font-size:22px}.sc-badge-card b{display:block;font-size:12.5px}.sc-badge-card small{font-size:11px;color:var(--muted)}

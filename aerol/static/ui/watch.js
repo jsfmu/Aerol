@@ -4,9 +4,10 @@ import { missionLabel, PHASE_LABEL, REGION_LABEL } from '../core/schedule.js';
 import { packetStatus, actionSummary, linkUp } from '../core/store.js';
 import { SEVERITY_LABEL } from '../core/rules.js';
 import { $, $$, esc, toast, throttle } from './dom.js';
+import { selfcareWatchPage } from './selfcare-view.js';
 import { PAGES, homePage, vitalsPage, wellnessPage, radiationPage, alertsPage, checkinPage, followupPage, alertOverlay } from './watch-screens.js';
 
-const RENDER = { home: homePage, vitals: vitalsPage, wellness: wellnessPage, radiation: radiationPage, alerts: alertsPage, checkin: checkinPage, followup: followupPage };
+const RENDER = { home: homePage, selfcare: selfcareWatchPage, vitals: vitalsPage, wellness: wellnessPage, radiation: radiationPage, alerts: alertsPage, checkin: checkinPage, followup: followupPage };
 
 export function mountWatchPage(root, store, { navigate, watchOnly = false }) {
   const ui = { page: 0, overlay: null, draft: freshDraft(), step: null };
@@ -102,6 +103,12 @@ export function mountWatchPage(root, store, { navigate, watchOnly = false }) {
     if (fx) { ui.draft.fatigue = Number(fx.dataset.fatigue); return renderPage(ui.page); }
     const cx = e.target.closest('[data-concern]');
     if (cx) { ui.draft.concern = cx.dataset.concern; return renderPage(ui.page); }
+    const sc = e.target.closest('[data-selfcare]');
+    if (sc) {
+      store.addAction({ action: 'selfcare', data: { kind: sc.dataset.selfcare } });
+      toast(sc.dataset.selfcare === 'hydration' ? 'Drink logged (+ hydration quest progress).' : 'Wind-down session logged. Nice.');
+      return;
+    }
     const act = e.target.closest('[data-act]');
     if (!act) return;
     const ep = act.dataset.ep;
@@ -166,7 +173,7 @@ export function mountWatchPage(root, store, { navigate, watchOnly = false }) {
         <dt>Dose rate</dt><dd>${fmt(w.rate, 2)} mSv/day · total ${fmt(w.dose, 1)} mSv</dd>
         <dt>Earth link</dt><dd>${w.linkUp ? 'up' : 'unavailable'} (simulated) · ${queued.length} packet(s) queued onboard</dd>
         <dt>Scenario</dt><dd>${esc(m.scenario.name)}</dd></dl>
-        <div class="row" style="margin-top:10px"><button class="btn" data-nav-earth>Open Earth research dashboard →</button></div>
+        <div class="row" style="margin-top:10px"><button class="btn" data-nav-earth>Open Earth dashboard →</button></div>
       </section>
       <section class="panel"><h2>Evidence packets</h2><p class="sub">Alerts and check-ins leave the watch as packets. Delivery depends on the simulated link; the ground view is stale until they arrive.</p>
         <div class="loglist">${recent.length ? recent.map(p => `<div><span>${esc(missionLabel(m.schedule, p.created, true))} · ${esc(p.summary)}</span><span class="sub">${esc(packetStatus(p, t))}</span></div>`).join('') : '<span class="sub">No packets yet.</span>'}</div>

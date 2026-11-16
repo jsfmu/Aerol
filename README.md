@@ -17,7 +17,7 @@ python3 -m aerol            # Python 3.9+; no third-party packages
 | URL | Experience |
 |---|---|
 | http://127.0.0.1:8000/ | **Astronaut watch** simulator + demo walkthrough |
-| http://127.0.0.1:8000/earth/ | **Earth research dashboard** (physicians & researchers) |
+| http://127.0.0.1:8000/earth/ | **Earth dashboard** — “View as” **crew member** (onboard, plain language, own data, no link delay) or **Earth physician & research team** (delayed ground view, review queues, research tools) |
 | http://127.0.0.1:8000/mobile/ | Watch only (phone layout) |
 
 Both experiences share one store and one simulation clock (synced across tabs), so the watch and
@@ -36,6 +36,14 @@ Use the **Demo walkthrough** panel on the watch page:
 7. **Landing and recovery** — dose plateaus, R+0 WBC result (simulated lab) triggers a configured-change review, TERRA relaxes toward 1.0×.
 
 More detail: [docs/DEMO.md](docs/DEMO.md).
+
+## Self-care (gamified)
+
+A **Self-care** screen on the watch and in the crew dashboard: six daily quests (wear the band, sleep
+opportunity, exercise, check-in, hydration, wind-down), XP and levels, a streak (4 of 6 quests per
+day), a 4-week heat map and badges. Points reward habits, never vitals; reporting symptoms always
+earns points; nothing rewards ignoring an alert; no crew leaderboards. Days before you start using
+the demo include clearly labeled simulated history so streaks are meaningful when jumping in time.
 
 ## What is real, what is simulated
 
@@ -66,7 +74,7 @@ Model and scoring: [docs/MODEL.md](docs/MODEL.md). Record contract (`aerol.terra
 
 ```sh
 python3 -m unittest discover -s tests -v     # API, schema parity, radiation integration (20 tests)
-node --test tests/js/*.test.mjs              # JS core: phases, dose math, models, alerts, link, schema (16 tests)
+node --test tests/js/*.test.mjs              # JS core: phases, dose math, models, alerts, link, schema, self-care (18 tests)
 ```
 
 Rebuild the observed-data bundle after changing source files: `python3 scripts/build_research_data.py`

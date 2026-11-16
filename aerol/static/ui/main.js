@@ -39,7 +39,7 @@ function show(args = {}) {
   } else if (!watch) {
     watch = mountWatchPage($('#watch-app'), store, { navigate, watchOnly: route === 'watch-only' });
   } else watch.render();
-  document.title = isEarth ? 'AEROL · Earth research dashboard' : 'AEROL · Astronaut watch';
+  document.title = isEarth ? 'AEROL · Earth dashboard' : 'AEROL · Astronaut watch';
 }
 
 function renderStatus() {
